@@ -1,0 +1,44 @@
+return {
+  {
+    'justinmk/vim-sneak',
+    init = function()
+      -- 启用标签显示sneak#label
+      -- 禁用 s 作为 sneak 的触发键sneak#s_next
+      -- 启用智能大小写敏感搜索sneak#use_ic_scs
+      vim.api.nvim_command [[
+        let g:sneak#label = 1
+        let g:sneak#s_next = 0
+        let g:sneak#use_ic_scs = 1
+        highlight Sneak guifg=black guibg=Green ctermfg=black ctermbg=red
+        highlight SneakScope guibg=Green guifg=Black
+        highlight SneakLabel guibg=Green guifg=White
+      ]]
+    end,
+    keys = {
+      {
+        's',
+        '<Plug>Sneak_s',
+      },
+      {
+        'S',
+        '<Plug>Sneak_S',
+      },
+      {
+        'f',
+        '<Plug>Sneak_f',
+      },
+      {
+        'F',
+        '<Plug>Sneak_F',
+      },
+      {
+        't',
+        '<Plug>Sneak_t',
+      },
+      {
+        'T',
+        '<Plug>Sneak_T',
+      },
+    },
+  },
+}

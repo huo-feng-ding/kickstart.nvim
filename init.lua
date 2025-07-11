@@ -219,6 +219,8 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+require 'custom'
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -541,14 +543,14 @@ require('lazy').setup({
 
           -- Execute a code action, usually your cursor needs to be on top of an error
           -- or a suggestion from your LSP for this to activate.
-          map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
+          -- map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
 
           -- Find references for the word under your cursor.
           map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
-          map('gri', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+          -- map('gri', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
 
           -- Jump to the definition of the word under your cursor.
           --  This is where a variable was first declared, or where a function is defined, etc.
@@ -889,6 +891,18 @@ require('lazy').setup({
         styles = {
           comments = { italic = false }, -- Disable italics in comments
         },
+        on_highlights = function(highlights, colors)
+          highlights.Visual = {
+            bg = '#0e5e97',
+          }
+          highlights.CursorLine = {
+            bg = '#064470',
+          }
+          highlights.IncSearch = {
+            bg = '#b6a014',
+            fg = '#fafafa',
+          }
+        end,
       }
 
       -- Load the colorscheme here.
@@ -976,15 +990,15 @@ require('lazy').setup({
   -- require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
