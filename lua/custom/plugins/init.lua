@@ -80,38 +80,106 @@ return {
     end,
   },
   {
-    'nvim-tree/nvim-tree.lua',
-    version = '*',
-    lazy = false,
+    'romgrk/barbar.nvim',
     dependencies = {
-      'nvim-tree/nvim-web-devicons', -- 可选，用于图标支持
+      'lewis6991/gitsigns.nvim', -- OPTIONAL: for git status
+      'nvim-tree/nvim-web-devicons', -- OPTIONAL: for file icons
     },
-    config = function()
-      -- 配置 nvim-tree
-      require('nvim-tree').setup {
-        -- 自定义配置选项
-        sort_by = 'case_sensitive',
-        view = {
-          width = 30,
-          side = 'left',
-        },
-        renderer = {
-          group_empty = true,
-        },
-        filters = {
-          dotfiles = true,
-        },
-        update_focused_file = {
-          enable = true,
-          update_root = true,
-          update_cwd = true,
-        },
-      }
+    init = function()
+      vim.g.barbar_auto_setup = false
 
-      -- 键映射
-      vim.keymap.set('n', '<leader>E', ':NvimTreeToggle %:p:h<CR>', { noremap = true, silent = true })
-      vim.keymap.set('n', '<leader>o', ':NvimTreeFindFileToggle<CR>', { noremap = true, silent = true })
+      local map = vim.api.nvim_set_keymap
+      local opts = { noremap = true, silent = true }
+
+      -- Move to previous/next
+      map('n', '<A-,>', '<Cmd>BufferPrevious<CR>', opts)
+      map('n', '<A-.>', '<Cmd>BufferNext<CR>', opts)
+
+      -- Re-order to previous/next
+      map('n', '<A-<>', '<Cmd>BufferMovePrevious<CR>', opts)
+      map('n', '<A->>', '<Cmd>BufferMoveNext<CR>', opts)
+
+      -- Goto buffer in position...
+      map('n', '<A-1>', '<Cmd>BufferGoto 1<CR>', opts)
+      map('n', '<A-2>', '<Cmd>BufferGoto 2<CR>', opts)
+      map('n', '<A-3>', '<Cmd>BufferGoto 3<CR>', opts)
+      map('n', '<A-4>', '<Cmd>BufferGoto 4<CR>', opts)
+      map('n', '<A-5>', '<Cmd>BufferGoto 5<CR>', opts)
+      map('n', '<A-6>', '<Cmd>BufferGoto 6<CR>', opts)
+      map('n', '<A-7>', '<Cmd>BufferGoto 7<CR>', opts)
+      map('n', '<A-8>', '<Cmd>BufferGoto 8<CR>', opts)
+      map('n', '<A-9>', '<Cmd>BufferGoto 9<CR>', opts)
+      map('n', '<A-0>', '<Cmd>BufferLast<CR>', opts)
+
+      -- Pin/unpin buffer
+      map('n', '<A-p>', '<Cmd>BufferPin<CR>', opts)
+
+      -- Goto pinned/unpinned buffer
+      --                 :BufferGotoPinned
+      --                 :BufferGotoUnpinned
+
+      -- Close buffer
+      map('n', '<A-w>', '<Cmd>BufferClose<CR>', opts)
+
+      -- Wipeout buffer
+      --                 :BufferWipeout
+
+      -- Close commands
+      --                 :BufferCloseAllButCurrent
+      --                 :BufferCloseAllButPinned
+      --                 :BufferCloseAllButCurrentOrPinned
+      --                 :BufferCloseBuffersLeft
+      --                 :BufferCloseBuffersRight
+
+      -- Magic buffer-picking mode
+      map('n', '<C-p>', '<Cmd>BufferPick<CR>', opts)
+      map('n', '<C-s-p>', '<Cmd>BufferPickDelete<CR>', opts)
+
+      -- Sort automatically by...
+      map('n', '<Space>bb', '<Cmd>BufferOrderByBufferNumber<CR>', opts)
+      map('n', '<Space>bn', '<Cmd>BufferOrderByName<CR>', opts)
+      map('n', '<Space>bd', '<Cmd>BufferOrderByDirectory<CR>', opts)
+      map('n', '<Space>bl', '<Cmd>BufferOrderByLanguage<CR>', opts)
+      map('n', '<Space>bw', '<Cmd>BufferOrderByWindowNumber<CR>', opts)
+
+      -- Other:
+      -- :BarbarEnable - enables barbar (enabled by default)
+      -- :BarbarDisable - very bad command, should never be used
+
+      map('n', '<A-t>', '<Cmd>tabnew<CR>', opts)
+
+      -- 多标签页的情况下，修改了一个标签页下的内容按ZZ保存并退出需要按两次，这里做处理只需要按一次
+      vim.api.nvim_create_autocmd('WinClosed', {
+        callback = function(tbl)
+          if vim.api.nvim_buf_is_valid(tbl.buf) then
+            vim.api.nvim_buf_delete(tbl.buf, {})
+          end
+        end,
+        group = vim.api.nvim_create_augroup('barbar_close_buf', {}),
+      })
     end,
+    opts = {
+      -- lazy.nvim will automatically call setup for you. put your options here, anything missing will use the default:
+      -- animation = true,
+      -- insert_at_start = true,
+      -- …etc.
+      -- Enable/disable current/total tabpages indicator (top right corner)
+      tabpages = true,
+
+      -- Enables/disable clickable tabs
+      --  - left-click: go to buffer
+      --  - middle-click: delete buffer
+      clickable = true,
+      -- Enable highlighting visible buffers
+      highlight_visible = true,
+      icons = {
+        -- Configure the base icons on the bufferline.
+        -- Valid options to display the buffer index and -number are `true`, 'superscript' and 'subscript'
+        buffer_index = true,
+        buffer_number = false,
+      },
+    },
+    version = '^1.0.0', -- optional: only update when a new 1.x version is released
   },
   {
     'machakann/vim-highlightedyank',
@@ -128,13 +196,19 @@ return {
         -- 定义reg命令展示的视图.下边的routes路由去查找展示的命令结果来指定当前这个视图
         registers = {
           backend = 'split',
-          timeout = 10000, -- 弹出窗口自动关闭时间
+          -- 弹出窗口自动关闭时间
+          timeout = 10000,
           win_options = {
-            winblend = 0, -- 弹出窗口的透明度0表示不透明
+            -- 弹出窗口的透明度0表示不透明
+            winblend = 0,
           },
           close = {
             keys = { 'q', '<Esc>' },
           },
+        },
+        mini = {
+          -- 弹出窗口自动关闭时间
+          timeout = 5000,
         },
       },
       lsp = {
@@ -149,9 +223,12 @@ return {
           filter = {
             event = 'msg_show',
             any = {
+              -- 保存操作时的提示
               { find = '%d+L, %d+B' },
-              { find = '; after #%d+' },
+              -- 撤销修改时的提示
               { find = '; before #%d+' },
+              -- 恢复操作时的提示
+              { find = '; after #%d+' },
             },
           },
           view = 'mini',
