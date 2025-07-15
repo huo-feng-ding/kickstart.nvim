@@ -79,6 +79,30 @@ return {
       vim.api.nvim_set_keymap('n', '<Leader>gr', '"+gr', { noremap = false, silent = true })
     end,
   },
+  -- buffer的管理，本想着用这个插件配合barbar.nvim能解决多标签页的情况下ZQ退出标签页不能正常退出的问题，但是用了这个插件反而无法显示多标签页了
+  -- {
+  --   'tiagovla/scope.nvim',
+  --   event = { 'BufReadPre', 'BufNewFile' },
+  --   config = function()
+  --     require('scope').setup {
+  --       hooks = {
+  --         pre_tab_leave = function()
+  --           vim.api.nvim_exec_autocmds('User', { pattern = 'ScopeTabLeavePre' })
+  --           -- [other statements]
+  --         end,
+  --
+  --         post_tab_enter = function()
+  --           vim.api.nvim_exec_autocmds('User', { pattern = 'ScopeTabEnterPost' })
+  --           -- [other statements]
+  --         end,
+  --
+  --         -- [other hooks]
+  --       },
+  --
+  --       -- [other options]
+  --     }
+  --   end,
+  -- },
   {
     'romgrk/barbar.nvim',
     dependencies = {
@@ -153,7 +177,7 @@ return {
       vim.api.nvim_create_autocmd('WinClosed', {
         callback = function(tbl)
           if vim.api.nvim_buf_is_valid(tbl.buf) then
-            vim.api.nvim_buf_delete(tbl.buf, {})
+            vim.api.nvim_buf_delete(tbl.buf, { force = true })
           end
         end,
         group = vim.api.nvim_create_augroup('barbar_close_buf', {}),
@@ -164,6 +188,9 @@ return {
       -- animation = true,
       -- insert_at_start = true,
       -- …etc.
+      -- Automatically hide the tabline when there are this many buffers left.
+      -- Set to any value >=0 to enable.
+      auto_hide = true,
       -- Enable/disable current/total tabpages indicator (top right corner)
       tabpages = true,
 
