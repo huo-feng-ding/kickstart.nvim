@@ -67,3 +67,22 @@ vim.api.nvim_create_autocmd('BufReadPost', {
     end
   end,
 })
+
+-- 修改标签页的显示
+-- _TABLINE = {}
+--
+-- _TABLINE.generate_tabline = function()
+--   local s = ''
+--   for i = 1, vim.fn.tabpagenr '$' do
+--     local buflist = vim.fn.tabpagebuflist(i)
+--     local winnr = vim.fn.tabpagewinnr(i)
+--     local title = vim.fn.fnamemodify(vim.fn.bufname(buflist[winnr]), ':t')
+--     title = title ~= '' and title or '[No Name]'
+--     -- 支持鼠标点击切换：%T 标记 + 序号
+--     s = s .. '%' .. i .. 'T' -- 启用鼠标点击区域
+--     s = s .. (i == vim.fn.tabpagenr() and '%#TabLineSel#' or '%#TabLine#')
+--     s = s .. i .. ': ' .. title .. ' ' -- 格式：序号 + 标题
+--   end
+--   return s .. '%#TabLineFill#%T' -- 填充剩余空间并关闭鼠标区域
+-- end
+-- vim.o.tabline = '%!v:lua._TABLINE.generate_tabline()'

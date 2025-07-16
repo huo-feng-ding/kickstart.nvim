@@ -79,135 +79,151 @@ return {
       vim.api.nvim_set_keymap('n', '<Leader>gr', '"+gr', { noremap = false, silent = true })
     end,
   },
-  -- buffer的管理，本想着用这个插件配合barbar.nvim能解决多标签页的情况下ZQ退出标签页不能正常退出的问题，但是用了这个插件反而无法显示多标签页了
-  -- {
-  --   'tiagovla/scope.nvim',
-  --   event = { 'BufReadPre', 'BufNewFile' },
-  --   config = function()
-  --     require('scope').setup {
-  --       hooks = {
-  --         pre_tab_leave = function()
-  --           vim.api.nvim_exec_autocmds('User', { pattern = 'ScopeTabLeavePre' })
-  --           -- [other statements]
-  --         end,
-  --
-  --         post_tab_enter = function()
-  --           vim.api.nvim_exec_autocmds('User', { pattern = 'ScopeTabEnterPost' })
-  --           -- [other statements]
-  --         end,
-  --
-  --         -- [other hooks]
-  --       },
-  --
-  --       -- [other options]
-  --     }
-  --   end,
-  -- },
   {
-    'romgrk/barbar.nvim',
-    dependencies = {
-      'lewis6991/gitsigns.nvim', -- OPTIONAL: for git status
-      'nvim-tree/nvim-web-devicons', -- OPTIONAL: for file icons
-    },
-    init = function()
-      vim.g.barbar_auto_setup = false
+    'nanozuki/tabby.nvim',
+    config = function()
+      -- always display tabline
+      --vim.o.showtabline = 2
+      -- Save and restore in session
+      --vim.opt.sessionoptions = 'curdir,folds,globals,help,tabpages,terminal,winsize'
 
-      local map = vim.api.nvim_set_keymap
-      local opts = { noremap = true, silent = true }
+      vim.api.nvim_create_user_command('SmartTabClose', function()
+        -- local current_tab = vim.fn.tabpagenr() -- 当前标签页序号
+        -- local total_tabs = vim.fn.tabpagenr '$' -- 总标签页数
+        -- local function close()
+        --   if total_tabs == 1 then
+        --     vim.cmd 'q' -- 仅剩一个标签页时退出
+        --   else
+        --     vim.cmd 'tabclose' -- 否则关闭当前标签页
+        --   end
+        -- end
 
-      -- Move to previous/next
-      map('n', '<A-,>', '<Cmd>BufferPrevious<CR>', opts)
-      map('n', '<A-.>', '<Cmd>BufferNext<CR>', opts)
+        local buf_modified = vim.api.nvim_buf_get_option(0, 'modified') -- 检查当前缓冲区是否修改
+        if buf_modified then
+          -- 弹窗提示用户选择
+          local choice = vim.fn.confirm('文件未保存，是否保存？', '&Save\n&Discard\n&Cancel', 2)
+          if choice == 1 then -- 用户选择 Save
+            vim.cmd 'wq'
+          elseif choice == 2 then -- 用户选择 Discard
+            vim.cmd 'q!'
+          end -- 选择 Cancel 则不操作
 
-      -- Re-order to previous/next
-      map('n', '<A-<>', '<Cmd>BufferMovePrevious<CR>', opts)
-      map('n', '<A->>', '<Cmd>BufferMoveNext<CR>', opts)
+          -- vim.ui.select({ 'Save & Quit', 'Quit Without Save', 'Cancel' }, { prompt = '文件未保存，是否保存更改？' }, function(choice)
+          --   if choice == 'Save & Quit' then
+          --     vim.cmd 'wq' -- 保存并退出
+          --   elseif choice == 'Quit Without Save' then
+          --     vim.cmd 'q!' -- 强制退出不保存
+          --   end
+          --   -- 选择 Cancel 则不操作
+          -- end)
+        else
+          vim.cmd 'q!'
+        end
+      end, { desc = '智能关闭标签页：仅剩一个时退出，否则关闭当前页' })
 
-      -- Goto buffer in position...
-      map('n', '<A-1>', '<Cmd>BufferGoto 1<CR>', opts)
-      map('n', '<A-2>', '<Cmd>BufferGoto 2<CR>', opts)
-      map('n', '<A-3>', '<Cmd>BufferGoto 3<CR>', opts)
-      map('n', '<A-4>', '<Cmd>BufferGoto 4<CR>', opts)
-      map('n', '<A-5>', '<Cmd>BufferGoto 5<CR>', opts)
-      map('n', '<A-6>', '<Cmd>BufferGoto 6<CR>', opts)
-      map('n', '<A-7>', '<Cmd>BufferGoto 7<CR>', opts)
-      map('n', '<A-8>', '<Cmd>BufferGoto 8<CR>', opts)
-      map('n', '<A-9>', '<Cmd>BufferGoto 9<CR>', opts)
-      map('n', '<A-0>', '<Cmd>BufferLast<CR>', opts)
+      vim.api.nvim_set_keymap('n', '<A-t>', ':$tabnew<CR>', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-w>', ':SmartTabClose<CR>', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-1>', '1gt', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-2>', '2gt', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-3>', '3gt', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-4>', '4gt', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-5>', '5gt', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-6>', '6gt', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-7>', '7gt', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-8>', '8gt', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-9>', '9gt', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-0>', 'g<Tab>', { noremap = true })
 
-      -- Pin/unpin buffer
-      map('n', '<A-p>', '<Cmd>BufferPin<CR>', opts)
+      require('tabby').setup {
+        line = function(line)
+          local theme = {
+            fill = 'TabLineFill',
+            -- Also you can do this: fill = { fg='#f2e9de', bg='#907aa9', style='italic' }
+            head = 'TabLine',
+            current_tab = 'TabLineSel',
+            tab = 'TabLine',
+            win = 'TabLine',
+            tail = 'TabLine',
+          }
 
-      -- Goto pinned/unpinned buffer
-      --                 :BufferGotoPinned
-      --                 :BufferGotoUnpinned
-
-      -- Close buffer
-      map('n', '<A-w>', '<Cmd>BufferClose<CR>', opts)
-
-      -- Wipeout buffer
-      --                 :BufferWipeout
-
-      -- Close commands
-      --                 :BufferCloseAllButCurrent
-      --                 :BufferCloseAllButPinned
-      --                 :BufferCloseAllButCurrentOrPinned
-      --                 :BufferCloseBuffersLeft
-      --                 :BufferCloseBuffersRight
-
-      -- Magic buffer-picking mode
-      map('n', '<C-p>', '<Cmd>BufferPick<CR>', opts)
-      map('n', '<C-s-p>', '<Cmd>BufferPickDelete<CR>', opts)
-
-      -- Sort automatically by...
-      -- <space>b 和jump快捷键有重复影响jump快捷键的响应
-      -- map('n', '<Space>bb', '<Cmd>BufferOrderByBufferNumber<CR>', opts)
-      -- map('n', '<Space>bn', '<Cmd>BufferOrderByName<CR>', opts)
-      -- map('n', '<Space>bd', '<Cmd>BufferOrderByDirectory<CR>', opts)
-      -- map('n', '<Space>bl', '<Cmd>BufferOrderByLanguage<CR>', opts)
-      -- map('n', '<Space>bw', '<Cmd>BufferOrderByWindowNumber<CR>', opts)
-
-      -- Other:
-      -- :BarbarEnable - enables barbar (enabled by default)
-      -- :BarbarDisable - very bad command, should never be used
-
-      map('n', '<A-t>', '<Cmd>tabnew<CR>', opts)
-
-      -- 多标签页的情况下，修改了一个标签页下的内容按ZZ保存并退出需要按两次，这里做处理只需要按一次
-      vim.api.nvim_create_autocmd('WinClosed', {
-        callback = function(tbl)
-          if vim.api.nvim_buf_is_valid(tbl.buf) then
-            vim.api.nvim_buf_delete(tbl.buf, { force = true })
+          local function buf_modified(buf)
+            if vim.bo[buf].modified then
+              return '●'
+            else
+              return ''
+            end
           end
-        end,
-        group = vim.api.nvim_create_augroup('barbar_close_buf', {}),
-      })
-    end,
-    opts = {
-      -- lazy.nvim will automatically call setup for you. put your options here, anything missing will use the default:
-      -- animation = true,
-      -- insert_at_start = true,
-      -- …etc.
-      -- Automatically hide the tabline when there are this many buffers left.
-      -- Set to any value >=0 to enable.
-      auto_hide = true,
-      -- Enable/disable current/total tabpages indicator (top right corner)
-      tabpages = true,
 
-      -- Enables/disable clickable tabs
-      --  - left-click: go to buffer
-      --  - middle-click: delete buffer
-      clickable = true,
-      -- Enable highlighting visible buffers
-      highlight_visible = true,
-      icons = {
-        -- Configure the base icons on the bufferline.
-        -- Valid options to display the buffer index and -number are `true`, 'superscript' and 'subscript'
-        buffer_index = true,
-        buffer_number = false,
-      },
-    },
-    version = '^1.0.0', -- optional: only update when a new 1.x version is released
+          local function tab_modified(tab, tabId, hl)
+            local wins = require('tabby.module.api').get_tab_wins(tabId)
+            for _, x in pairs(wins) do
+              if vim.bo[vim.api.nvim_win_get_buf(x)].modified then
+                return {
+                  line.sep('', hl, theme.fill),
+                  '%' .. tab.number() .. 'T', -- 启用鼠标点击区域
+                  -- tab.is_current() and ' ' or '󰆣 ',
+                  '●',
+                  --tab.number(),
+                  tab.in_jump_mode() and tab.jump_key() or tab.number(),
+                  tab.name(),
+                  tab.close_btn '',
+                  line.sep('', hl, theme.fill),
+                  hl = hl,
+                  margin = ' ',
+                }
+              end
+            end
+            return {
+              line.sep('', hl, theme.fill),
+              '%' .. tab.number() .. 'T', -- 启用鼠标点击区域
+              --tab.is_current() and '' or '󰆣',
+              --tab.number(),
+              tab.in_jump_mode() and tab.jump_key() or tab.number(),
+              tab.name(),
+              tab.close_btn '',
+              line.sep('', hl, theme.fill),
+              hl = hl,
+              margin = ' ',
+            }
+          end
+
+          return {
+            {
+              { '  ', hl = theme.head },
+              line.sep('', theme.head, theme.fill),
+            },
+            line.tabs().foreach(function(tab)
+              local hl = tab.is_current() and theme.current_tab or theme.tab
+              return {
+                tab_modified(tab, tab.id, hl),
+              }
+            end),
+            line.spacer(),
+            line.wins_in_tab(line.api.get_current_tab()).foreach(function(win)
+              return {
+                line.sep('', theme.win, theme.fill),
+                --win.is_current() and '' or '',
+                buf_modified(win.buf().id),
+                win.buf_name(),
+                line.sep('', theme.win, theme.fill),
+                hl = theme.win,
+                margin = ' ',
+              }
+            end),
+            {
+              line.sep('', theme.tail, theme.fill),
+              { '  ', hl = theme.tail },
+            },
+            hl = theme.fill,
+          }
+        end,
+        option = {
+          buf_name = {
+            mode = 'unique', -- or 'unique', 'relative', 'tail', 'shorten'
+          },
+        },
+      }
+    end,
   },
   {
     'machakann/vim-highlightedyank',

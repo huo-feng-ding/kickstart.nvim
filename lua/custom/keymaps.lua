@@ -99,5 +99,5 @@ vim.keymap.set('n', '<Leader>N<space>', '?<C-R>+<CR>', { noremap = true })
 vim.keymap.set('c', '<C-v>', '<C-R>+', { noremap = true })
 
 -- vim-ReplaceWithRegister插件的gr命令和lsp插件有冲突; 2025-07-11在init.lua的lsp配置中已经将下边这两个快捷键注释掉了，所以下边的也不用去删除了。这里先保持注释以便日后知道有这么个问题。 In Neovim, there's an overlap with LSP-related commands, and if you want to use the plugin's gr{motion} with inner/outer text objects, you need to remove (and optionally remap) the gra and gri commands:
---vim.keymap.del('n', 'gra')
---vim.keymap.del('n', 'gri')
+vim.keymap.del('n', 'gra')
+vim.keymap.del('n', 'gri')
