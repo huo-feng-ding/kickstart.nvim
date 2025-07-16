@@ -24,9 +24,18 @@ vim.keymap.set('i', '<C-V>', '<C-R>+', { noremap = true })
 vim.keymap.set('', '<S-Insert>', '"+gP', { noremap = true })
 
 -- Ctrl+s 进行保存操作
-vim.keymap.set('n', '<C-s>', ':w<CR>', { noremap = true })
-vim.keymap.set('v', '<C-s>', '<Esc>:w<CR>', { noremap = true })
-vim.keymap.set('i', '<C-s>', '<Esc>:w<CR>a', { noremap = true })
+-- vim.keymap.set('n', '<C-s>', ':w<CR>', { noremap = true })
+-- vim.keymap.set('v', '<C-s>', '<Esc>:w<CR>', { noremap = true })
+-- vim.keymap.set('i', '<C-s>', '<Esc>:w<CR>a', { noremap = true })
+-- 使用下边的方法在保存的过程中不会闪的一下出现弹窗
+vim.keymap.set({ 'n', 'i', 'v' }, '<C-s>', function()
+  vim.cmd 'w' -- 执行保存
+end, { desc = 'Save file' })
+
+-- 终端兼容：将 Ctrl-s 转义序列绑定到保存
+if vim.fn.has 'terminal' == 1 then
+  vim.keymap.set('t', '<C-s>', [[<C-\><C-n>:w<CR>]], { noremap = true })
+end
 
 -- 使用 leader 键进行复制粘贴
 vim.keymap.set('v', '<leader>y', '"+y', { noremap = true })
