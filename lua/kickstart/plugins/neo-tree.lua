@@ -12,7 +12,25 @@ return {
   lazy = false,
   keys = {
     -- { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
-    { '\\', ':Neotree position=current dir=%:p:h:h reveal_file=%:p<CR>', desc = 'NeoTree reveal', silent = true },
+    --{ '\\', ':Neotree position=current dir=%:p:h:h reveal_file=%:p<CR>', desc = 'NeoTree reveal', silent = true },
+    {
+      '\\',
+      function()
+        local bufname = vim.api.nvim_buf_get_name(0)
+        if bufname == '' or bufname:match '^term://' then
+          -- 空缓冲区或终端缓冲区
+          if vim.fn.has 'win32' == 1 then
+            vim.cmd 'Neotree position=current dir=d:/'
+          else
+            vim.cmd 'Neotree position=current dir=/opt'
+          end
+        else
+          vim.cmd 'Neotree position=current dir=%:p:h:h reveal_file=%:p'
+        end
+      end,
+      desc = 'NeoTree reveal',
+      silent = true,
+    },
   },
   opts = {
     filesystem = {
