@@ -138,8 +138,8 @@ return {
         end
       end, { desc = '智能关闭标签页：仅剩一个时退出，否则关闭当前页' })
 
-      vim.api.nvim_set_keymap('n', '<A-t>', ':$tabnew<CR>', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-w>', ':SmartTabClose<CR>', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-t>', '<Cmd>tabnew<CR>', { noremap = true })
+      vim.api.nvim_set_keymap('n', '<A-w>', '<Cmd>SmartTabClose<CR>', { noremap = true })
       vim.api.nvim_set_keymap('n', '<A-1>', '1gt', { noremap = true })
       vim.api.nvim_set_keymap('n', '<A-2>', '2gt', { noremap = true })
       vim.api.nvim_set_keymap('n', '<A-3>', '3gt', { noremap = true })
