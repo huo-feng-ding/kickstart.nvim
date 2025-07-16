@@ -98,12 +98,29 @@ return {
         --   end
         -- end
 
-        local buf_modified = vim.api.nvim_buf_get_option(0, 'modified') -- 检查当前缓冲区是否修改
+        local bufnr = vim.api.nvim_get_current_buf() -- 当前缓冲区 ID
+        local buf_modified = vim.api.nvim_get_option_value('modified', { buf = bufnr }) -- 检查当前缓冲区是否修改
         if buf_modified then
           -- 弹窗提示用户选择
           local choice = vim.fn.confirm('文件未保存，是否保存？', '&Save\n&Discard\n&Cancel', 2)
           if choice == 1 then -- 用户选择 Save
-            vim.cmd 'wq'
+            local bufname = vim.api.nvim_buf_get_name(0)
+            if bufname == '' or bufname:match '^term://' then
+              -- 空缓冲区或终端缓冲区
+              local cwd = vim.fn.getcwd()
+              -- 判断路径是否以分隔符结尾
+              local is_ends_with_sep = cwd:match '[\\/]$' ~= nil
+              if not is_ends_with_sep then
+                local sep = vim.fs.get_separator()
+                cwd = cwd .. sep
+              end
+              local filename = vim.fn.input('Save to: ', cwd, 'file')
+              if filename ~= '' then
+                vim.cmd('wq ' .. filename)
+              end
+            else
+              vim.cmd 'wq'
+            end
           elseif choice == 2 then -- 用户选择 Discard
             vim.cmd 'q!'
           end -- 选择 Cancel 则不操作
