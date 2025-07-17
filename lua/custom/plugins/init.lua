@@ -80,6 +80,13 @@ return {
     end,
   },
   {
+    'machakann/vim-highlightedyank',
+    config = function()
+      vim.g.highlightedyank_highlight_duration = 600
+      vim.api.nvim_command 'highlight HighlightedyankRegion cterm=reverse gui=reverse'
+    end,
+  },
+  {
     'nanozuki/tabby.nvim',
     config = function()
       -- always display tabline
@@ -242,13 +249,58 @@ return {
       }
     end,
   },
-  {
-    'machakann/vim-highlightedyank',
-    config = function()
-      vim.g.highlightedyank_highlight_duration = 600
-      vim.api.nvim_command 'highlight HighlightedyankRegion cterm=reverse gui=reverse'
-    end,
-  },
+  -- 这个插件存在的唯一问题就是由于使用了projects.yazi插件，打开yazi的时候进入的不是当前文件目录，而加载的projects.yazi里的目录
+  -- {
+  --   'mikavilpas/yazi.nvim',
+  --   event = 'VeryLazy',
+  --   dependencies = {
+  --     { 'nvim-lua/plenary.nvim', lazy = true },
+  --   },
+  --   keys = {
+  --     -- 👇 in this section, choose your own keymappings!
+  --     {
+  --       '\\',
+  --       '<cmd>Yazi<cr>',
+  --       mode = { 'n', 'v' },
+  --       desc = 'Open yazi at the current file',
+  --     },
+  --     {
+  --       -- Open in the current working directory
+  --       '<leader>cw',
+  --       '<cmd>Yazi cwd<cr>',
+  --       desc = "Open the file manager in nvim's working directory",
+  --     },
+  --     {
+  --       '<a-up>',
+  --       '<cmd>Yazi toggle<cr>',
+  --       desc = 'Resume the last yazi session',
+  --     },
+  --   },
+  --   ---@type YaziConfig | {}
+  --   opts = {
+  --     -- if you want to open yazi instead of netrw, see below for more info
+  --     open_for_directories = false,
+  --     keymaps = {
+  --       show_help = '?',
+  --       open_file_in_vertical_split = '<a-v>',
+  --       open_file_in_horizontal_split = '<a-x>',
+  --       open_file_in_tab = 'o',
+  --       grep_in_directory = '<a-s>',
+  --       replace_in_directory = '<a-g>',
+  --       cycle_open_buffers = '<tab>',
+  --       copy_relative_path_to_selected_files = '<a-y>',
+  --       send_to_quickfix_list = '<a-q>',
+  --       change_working_directory = '<a-\\>',
+  --       open_and_pick_window = '<a-o>',
+  --     },
+  --   },
+  --   -- 👇 if you use `open_for_directories=true`, this is recommended
+  --   init = function()
+  --     -- More details: https://github.com/mikavilpas/yazi.nvim/issues/802
+  --     -- vim.g.loaded_netrw = 1
+  --     vim.g.loaded_netrwPlugin = 1
+  --   end,
+  -- },
   {
     'folke/noice.nvim',
     event = 'VeryLazy',
