@@ -145,18 +145,18 @@ return {
         end
       end, { desc = '智能关闭标签页：仅剩一个时退出，否则关闭当前页' })
 
-      vim.api.nvim_set_keymap('n', '<A-t>', '<Cmd>tabnew<CR>', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-w>', '<Cmd>SmartTabClose<CR>', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-1>', '1gt', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-2>', '2gt', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-3>', '3gt', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-4>', '4gt', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-5>', '5gt', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-6>', '6gt', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-7>', '7gt', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-8>', '8gt', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-9>', '9gt', { noremap = true })
-      vim.api.nvim_set_keymap('n', '<A-0>', 'g<Tab>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-t>', '<Cmd>tabnew<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-w>', '<Cmd>SmartTabClose<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-1>', '<Cmd>normal! 1gt<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-2>', '<Cmd>normal! 2gt<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-3>', '<Cmd>normal! 3gt<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-4>', '<Cmd>normal! 4gt<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-5>', '<Cmd>normal! 5gt<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-6>', '<Cmd>normal! 6gt<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-7>', '<Cmd>normal! 7gt<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-8>', '<Cmd>normal! 8gt<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-9>', '<Cmd>normal! 9gt<CR>', { noremap = true })
+      vim.keymap.set({ 'n', 'i' }, '<A-0>', '<Cmd>normal! g<Tab><CR>', { noremap = true })
 
       require('tabby').setup {
         line = function(line)
@@ -250,157 +250,172 @@ return {
     end,
   },
   -- 这个插件存在的唯一问题就是由于使用了projects.yazi插件，打开yazi的时候进入的不是当前文件目录，而加载的projects.yazi里的目录
-  {
-    'mikavilpas/yazi.nvim',
-    event = 'VeryLazy',
-    dependencies = {
-      { 'nvim-lua/plenary.nvim', lazy = true },
-    },
-    keys = {
-      -- 👇 in this section, choose your own keymappings!
-      {
-        '\\',
-        '<cmd>Yazi<cr>',
-        mode = { 'n', 'v' },
-        desc = 'Open yazi at the current file',
-      },
-      {
-        -- Open in the current working directory
-        '<leader>cw',
-        '<cmd>Yazi cwd<cr>',
-        desc = "Open the file manager in nvim's working directory",
-      },
-      {
-        '<a-up>',
-        '<cmd>Yazi toggle<cr>',
-        desc = 'Resume the last yazi session',
-      },
-    },
-    ---@type YaziConfig | {}
-    opts = {
-      -- if you want to open yazi instead of netrw, see below for more info
-      open_for_directories = true,
-      keymaps = {
-        show_help = '?',
-        open_file_in_vertical_split = '<a-v>',
-        open_file_in_horizontal_split = '<a-x>',
-        open_file_in_tab = 'o',
-        grep_in_directory = '<a-s>',
-        replace_in_directory = '<a-g>',
-        cycle_open_buffers = '<tab>',
-        copy_relative_path_to_selected_files = '<a-y>',
-        send_to_quickfix_list = '<a-q>',
-        change_working_directory = '<a-\\>',
-        open_and_pick_window = '<a-o>',
-      },
-      set_keymappings_function = function(yazi_buffer_id, config, context)
-        -- 重写退出快捷键，因为yazi退出时会projects.yazi插件会将标签页写入文件
-        vim.keymap.set({ 't' }, 'q', function()
-          context.api:emit_to_yazi { 'quit' }
-        end, { buffer = yazi_buffer_id })
-
-        -- 获取当前文件的父级目录
-        local function getParentDir(filepath)
-          -- 统一替换路径分隔符为 '/'
-          filepath = filepath:gsub('\\', '/')
-          -- 去除末尾的 '/'（如果有）
-          filepath = filepath:gsub('/+$', '')
-          -- 提取父目录
-          local parent = filepath:match '^(.*)/[^/]+$'
-          return parent or '.' -- 若没有父目录，返回当前目录 "."
-        end
-
-        -- 加载当前打开的文件目录
-        vim.keymap.set({ 't' }, 'e', function()
-          local path = vim.fn.expand '%'
-          local words = {}
-          for word in string.gmatch(path, '%S+') do
-            table.insert(words, word)
-          end
-          local quote_content = words[2]:match '^"(.*)"$'
-
-          -- local file = io.open('d:\\output.txt', 'w')
-          -- file:write(path)
-          -- file:write 'a'
-          -- file:write(quote_content)
-          -- file:write 'b'
-          -- file:write(words[2])
-          -- file:write 'c'
-          -- for k, v in pairs(config) do
-          --   file:write(k, ' ', type(v), ' ') -- 输出变量名和类型（避免打印过大的值）
-          --   if type(v) == 'string' then
-          --     file:write(v)
-          --   end
-          --   file:write '\n'
-          -- end
-          -- file:close()
-
-          context.api:emit_to_yazi { 'cd', getParentDir(quote_content) }
-        end, { buffer = yazi_buffer_id })
-      end,
-      -- hooks = {
-      --   yazi_opened = function(preselected_path, yazi_buffer_id, config)
-      --     -- https://yazi-rs.github.io/docs/configuration/keymap/#manager.find
-      --     function getParentDir(filepath)
-      --       -- 统一替换路径分隔符为 '/'
-      --       filepath = filepath:gsub('\\', '/')
-      --       -- 去除末尾的 '/'（如果有）
-      --       filepath = filepath:gsub('/+$', '')
-      --       -- 提取父目录
-      --       local parent = filepath:match '^(.*)/[^/]+$'
-      --       return parent or '.' -- 若没有父目录，返回当前目录 "."
-      --     end
-      --
-      --     local path = getParentDir(preselected_path)
-      --     local file = io.open('d:\\output.txt', 'w')
-      --     file:write(path)
-      --     file:write '\n'
-      --     file:write(yazi_buffer_id)
-      --     file:write '\n'
-      --     for k, v in pairs(config) do
-      --       file:write(k, type(v)) -- 输出变量名和类型（避免打印过大的值）
-      --       file:write '\n'
-      --     end
-      --     -- file:write(config)
-      --     file:close()
-      --     -- vim.system({ 'ya', 'emit-to', yazi_buffer_id, path }, { timeout = 1000 })
-      --     -- config:api:emit_to_yazi { 'cd', path }
-      --     -- vim.defer_fn(function()
-      --     --   -- vim.cmd '!ya emit cd c:\\'
-      --     --   print 'aaa'
-      --     --   process_api:emit_to_yazi { 'cd c:\\' }
-      --     -- end, 2000) -- 2000毫秒
-      --   end,
-      -- },
-    },
-    -- 👇 if you use `open_for_directories=true`, this is recommended
-    init = function()
-      -- More details: https://github.com/mikavilpas/yazi.nvim/issues/802
-      -- vim.g.loaded_netrw = 1
-      vim.g.loaded_netrwPlugin = 1
-    end,
-    -- config = function()
-    --   vim.keymap.set('n', '<leader>-', function()
-    --     require('yazi').yazi {
-    --       ---@diagnostic disable-next-line: missing-fields
-    --       hooks = {
-    --         on_yazi_ready = function(_, _, process_api)
-    --           -- https://yazi-rs.github.io/docs/configuration/keymap/#manager.find
-    --           -- process_api:emit_to_yazi { 'cd c:\\' }
-    --           vim.defer_fn(function()
-    --             -- vim.cmd '!ya emit cd c:\\'
-    --             print 'aaa'
-    --             process_api:emit_to_yazi { 'cd c:\\' }
-    --           end, 2000) -- 2000毫秒
-    --         end,
-    --       },
-    --     } -- require('yazi').yazi(nil, 'd:\\')
-    --     -- vim.defer_fn(function()
-    --     --   vim.cmd '!ya emit cd c:\\'
-    --     -- end, 2000) -- 2000毫秒
-    --   end)
-    -- end,
-  },
+  -- 目前重写了退出的快捷键，但是在新建标签页的时候，退出快捷键不起作用，还不知道是什么原因
+  -- {
+  --   'mikavilpas/yazi.nvim',
+  --   event = 'VeryLazy',
+  --   dependencies = {
+  --     { 'nvim-lua/plenary.nvim', lazy = true },
+  --   },
+  --   keys = {
+  --     -- 👇 in this section, choose your own keymappings!
+  --     {
+  --       '\\',
+  --       '<cmd>Yazi<cr>',
+  --       mode = { 'n', 'v' },
+  --       desc = 'Open yazi at the current file',
+  --     },
+  --     {
+  --       -- Open in the current working directory
+  --       '<leader>cw',
+  --       '<cmd>Yazi cwd<cr>',
+  --       desc = "Open the file manager in nvim's working directory",
+  --     },
+  --     {
+  --       '<a-up>',
+  --       '<cmd>Yazi toggle<cr>',
+  --       desc = 'Resume the last yazi session',
+  --     },
+  --   },
+  --   ---@type YaziConfig | {}
+  --   opts = function()
+  --     local openedPath = '/'
+  --     return {
+  --       -- if you want to open yazi instead of netrw, see below for more info
+  --       open_for_directories = false,
+  --       keymaps = {
+  --         show_help = '?',
+  --         open_file_in_vertical_split = '<a-v>',
+  --         open_file_in_horizontal_split = '<a-x>',
+  --         open_file_in_tab = 'o',
+  --         grep_in_directory = '<a-s>',
+  --         replace_in_directory = '<a-g>',
+  --         cycle_open_buffers = '<tab>',
+  --         copy_relative_path_to_selected_files = '<a-y>',
+  --         send_to_quickfix_list = '<a-q>',
+  --         change_working_directory = '<a-\\>',
+  --         open_and_pick_window = '<a-o>',
+  --       },
+  --       set_keymappings_function = function(yazi_buffer_id, config, context)
+  --         -- 重写退出快捷键，因为yazi退出时会projects.yazi插件会将标签页写入文件
+  --         vim.keymap.set({ 't' }, 'q', function()
+  --           context.api:emit_to_yazi { 'quit' }
+  --         end, { buffer = yazi_buffer_id })
+  --
+  --         -- 获取当前文件的父级目录
+  --         -- local function getParentDir(filepath)
+  --         --   -- 统一替换路径分隔符为 '/'
+  --         --   filepath = filepath:gsub('\\', '/')
+  --         --   -- 去除末尾的 '/'（如果有）
+  --         --   filepath = filepath:gsub('/+$', '')
+  --         --   -- 提取父目录
+  --         --   local parent = filepath:match '^(.*)/[^/]+$'
+  --         --   return parent or '.' -- 若没有父目录，返回当前目录 "."
+  --         -- end
+  --
+  --         -- 加载当前打开的文件目录
+  --         vim.keymap.set({ 't' }, 'e', function()
+  --           context.api:emit_to_yazi { 'cd', openedPath }
+  --           -- local path = vim.fn.expand '%'
+  --           -- local words = {}
+  --           -- for word in string.gmatch(path, '%S+') do
+  --           --   table.insert(words, word)
+  --           -- end
+  --           -- local quote_content = words[2]:match '^"(.*)"$'
+  --           -- context.api:emit_to_yazi { 'cd', getParentDir(quote_content) }
+  --
+  --           -- local file = io.open('d:\\output.txt', 'w')
+  --           -- file:write(path)
+  --           -- file:write 'a'
+  --           -- file:write(quote_content)
+  --           -- file:write 'b'
+  --           -- file:write(words[2])
+  --           -- file:write 'c'
+  --           -- for k, v in pairs(config) do
+  --           --   file:write(k, ' ', type(v), ' ') -- 输出变量名和类型（避免打印过大的值）
+  --           --   if type(v) == 'string' then
+  --           --     file:write(v)
+  --           --   end
+  --           --   file:write '\n'
+  --           -- end
+  --           -- file:close()
+  --         end, { buffer = yazi_buffer_id })
+  --       end,
+  --       -- log_level = vim.log.levels.DEBUG,
+  --       hooks = {
+  --         -- This function is called when yazi is ready to process events.
+  --         on_yazi_ready = function(buffer, config, process_api)
+  --           print(openedPath)
+  --           process_api:emit_to_yazi { 'cd', openedPath }
+  --         end,
+  --         yazi_opened = function(preselected_path, yazi_buffer_id, config)
+  --           -- https://yazi-rs.github.io/docs/configuration/keymap/#manager.find
+  --           local function getParentDir(filepath)
+  --             -- 统一替换路径分隔符为 '/'
+  --             filepath = filepath:gsub('\\', '/')
+  --             -- 去除末尾的 '/'（如果有）
+  --             filepath = filepath:gsub('/+$', '')
+  --             -- 提取父目录
+  --             local parent = filepath:match '^(.*)/[^/]+$'
+  --             return parent or '/' -- 若没有父目录，返回当前目录 "."
+  --           end
+  --           openedPath = getParentDir(preselected_path)
+  --           -- local file = io.open('d:\\output.txt', 'w')
+  --           -- file:write(path)
+  --           -- file:write '\n'
+  --           -- file:write(yazi_buffer_id)
+  --           -- file:write '\n'
+  --           -- for k, v in pairs(config) do
+  --           --   file:write(k, type(v)) -- 输出变量名和类型（避免打印过大的值）
+  --           --   file:write '\n'
+  --           -- end
+  --           -- -- file:write(config)
+  --           -- file:close()
+  --           -- vim.system({ 'ya', 'emit-to', yazi_buffer_id, path }, { timeout = 1000 })
+  --           -- config:api:emit_to_yazi { 'cd', path }
+  --           -- vim.defer_fn(function()
+  --           --   -- vim.cmd '!ya emit cd c:\\'
+  --           --   print 'aaa'
+  --           --   process_api:emit_to_yazi { 'cd c:\\' }
+  --           -- end, 2000) -- 2000毫秒
+  --         end,
+  --       },
+  --     }
+  --   end,
+  --   -- 👇 if you use `open_for_directories=true`, this is recommended
+  --   init = function()
+  --     -- More details: https://github.com/mikavilpas/yazi.nvim/issues/802
+  --     -- vim.g.loaded_netrw = 1
+  --     vim.g.loaded_netrwPlugin = 1
+  --   end,
+  --   -- config = function(_, opts)
+  --   --   local file = io.open('d:\\output.txt', 'w')
+  --   --   file:write(opts.aa)
+  --   --   file:write '\n'
+  --   --   file:close()
+  --   -- end,
+  --   -- config = function()
+  --   --   vim.keymap.set('n', '<leader>-', function()
+  --   --     require('yazi').yazi {
+  --   --       ---@diagnostic disable-next-line: missing-fields
+  --   --       hooks = {
+  --   --         on_yazi_ready = function(_, _, process_api)
+  --   --           -- https://yazi-rs.github.io/docs/configuration/keymap/#manager.find
+  --   --           -- process_api:emit_to_yazi { 'cd c:\\' }
+  --   --           vim.defer_fn(function()
+  --   --             -- vim.cmd '!ya emit cd c:\\'
+  --   --             print 'aaa'
+  --   --             process_api:emit_to_yazi { 'cd c:\\' }
+  --   --           end, 2000) -- 2000毫秒
+  --   --         end,
+  --   --       },
+  --   --     } -- require('yazi').yazi(nil, 'd:\\')
+  --   --     -- vim.defer_fn(function()
+  --   --     --   vim.cmd '!ya emit cd c:\\'
+  --   --     -- end, 2000) -- 2000毫秒
+  --   --   end)
+  --   -- end,
+  -- },
   {
     'folke/noice.nvim',
     event = 'VeryLazy',

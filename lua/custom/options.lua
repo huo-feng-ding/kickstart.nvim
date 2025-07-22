@@ -46,6 +46,12 @@ vim.opt.fileencodings = { 'utf-8', 'usc-bom', 'euc-jp', 'gb18030', 'gbk', 'gb231
 vim.opt.backspace = { 'indent', 'eol', 'start' }
 -- 总是显示标签页
 vim.opt.showtabline = 2
+--" 设置标签页的缩进
+vim.opt.tabstop = 2
+--" 不在缓冲区列表中显示未列出缓冲区
+vim.opt.buflisted = false
+--" 切换到已经打开的缓冲区
+vim.opt.switchbuf = useopen
 
 -- 重新定义 当前行和选中的行 的样式
 vim.api.nvim_command 'highlight Visual guifg=White guibg=#0e5e97 gui=none'

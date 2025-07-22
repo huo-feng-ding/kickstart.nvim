@@ -13,6 +13,18 @@ vim.api.nvim_set_keymap('n', '<BS>', [[v:hlsearch ? ":nohlsearch\<CR>" : "\<CR>"
 -- SecureCRT 连接的时候发送的 backspace 是 ctrl-h
 vim.keymap.set('n', '<C-H>', [[v:hlsearch ? ":nohlsearch\<CR>" : "\<CR>"]], { expr = true, noremap = true })
 
+-- 全选操作 普通模式和插入模式下均生效
+-- 定义函数：全选复制并保持光标位置
+local function async_select_all_and_copy()
+  local cursor_pos = vim.fn.getpos '.'
+  vim.schedule(function()
+    vim.cmd 'normal! ggVG"+y'
+    vim.fn.setpos('.', cursor_pos)
+  end)
+end
+-- 映射 Ctrl+A 到函数
+vim.keymap.set({ 'n', 'i' }, '<C-a>', async_select_all_and_copy, { desc = '全选并复制到剪贴板（保持光标）' })
+
 -- 复制粘贴操作
 vim.keymap.set('v', '<C-X>', '"+x', { noremap = true })
 vim.keymap.set('v', '<S-Del>', '"+x', { noremap = true })
@@ -132,3 +144,4 @@ vim.api.nvim_set_keymap('n', '<A-l>', '<C-w>l', { noremap = true })
 -- vim-ReplaceWithRegister插件的gr命令和lsp插件有冲突; 2025-07-11在init.lua的lsp配置中已经将下边这两个快捷键注释掉了，所以下边的也不用去删除了。这里先保持注释以便日后知道有这么个问题。 In Neovim, there's an overlap with LSP-related commands, and if you want to use the plugin's gr{motion} with inner/outer text objects, you need to remove (and optionally remap) the gra and gri commands:
 vim.keymap.del('n', 'gra')
 vim.keymap.del('n', 'gri')
+vim.keymap.del('n', 'grt')
