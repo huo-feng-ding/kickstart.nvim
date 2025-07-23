@@ -25,7 +25,9 @@ return {
             vim.cmd 'Neotree position=current dir=/opt'
           end
         else
-          vim.cmd 'Neotree position=current dir=%:p:h:h reveal_file=%:p'
+          local path = vim.fn.expand '%:p'
+          local dir = path:sub(1, 1) == '/' and '/' or path:sub(1, 2) .. '/'
+          vim.cmd('Neotree position=current dir=' .. dir .. ' reveal_file=%:p')
         end
       end,
       desc = 'NeoTree reveal',
@@ -64,6 +66,8 @@ return {
           ['l'] = 'open_tabnew',
           ['<CR>'] = 'open_tabnew',
           ['h'] = 'navigate_up',
+          ['/'] = '',
+          ['f'] = 'fuzzy_finder',
           --重写t快捷键，t进行排序
           ['t'] = {
             'show_help',
@@ -88,20 +92,38 @@ return {
         end,
       },
     },
-    commands = {
-      open_and_close = function(state)
-        -- 相关代码参考于 https://github.com/nvim-neo-tree/neo-tree.nvim/wiki/Recipes#open-and-clear-search
-        local node = state.tree:get_node()
-        if node and node.type == 'file' then
-          local file_path = node:get_id()
-          -- reuse built-in commands to open and clear filter
-          local cmds = require 'neo-tree.sources.filesystem.commands'
-          cmds.open_tabnew(state)
-          vim.cmd 'Neotree close'
-          -- reveal the selected file without focusing the tree
-          -- require('neo-tree.sources.filesystem').navigate(state, state.path, file_path)
-        end
-      end,
-    },
+    -- commands = {
+    --   open_and_close = function(state)
+    --     -- 相关代码参考于 https://github.com/nvim-neo-tree/neo-tree.nvim/wiki/Recipes#open-and-clear-search
+    --     local node = state.tree:get_node()
+    --     if node and node.type == 'file' then
+    --       local file_path = node:get_id()
+    --       -- reuse built-in commands to open and clear filter
+    --       local cmds = require 'neo-tree.sources.filesystem.commands'
+    --       cmds.open_tabnew(state)
+    --       vim.cmd 'Neotree close'
+    --       -- reveal the selected file without focusing the tree
+    --       -- require('neo-tree.sources.filesystem').navigate(state, state.path, file_path)
+    --     end
+    --   end,
+    --   navigate_parent = function(state)
+    --     local node = state.tree:get_node()
+    --     node = state.tree:get_node(node:get_parent_id())
+    --     if node then
+    --       if node:get_id() == state.path then
+    --         local cmds = require 'neo-tree.sources.filesystem.commands'
+    --         cmds.navigate_up(state)
+    --         -- local file = io.open('d:\\lua.log', 'w')
+    --         -- for key, value in pairs(state.tree.node) do
+    --         --   file:write(key, ' ', type(value))
+    --         --   file:write '\n'
+    --         -- end
+    --         -- file:close()
+    --       end
+    --       local renderer = require 'neo-tree.ui.renderer'
+    --       renderer.focus_node(state, node:get_id())
+    --     end
+    --   end,
+    -- },
   },
 }
