@@ -8,7 +8,7 @@ vim.keymap.set('n', "'", '`', { noremap = true })
 vim.keymap.set('n', '`', "'", { noremap = true })
 
 -- 后退取消搜索高亮
-vim.api.nvim_set_keymap('n', '<BS>', [[v:hlsearch ? ":nohlsearch\<CR>" : "\<CR>"]], { expr = true, noremap = true })
+vim.api.nvim_set_keymap('n', '<BS>', [[v:hlsearch ? "<Cmd>nohlsearch\<CR>" : "\<CR>"]], { expr = true, noremap = true })
 
 -- SecureCRT 连接的时候发送的 backspace 是 ctrl-h
 vim.keymap.set('n', '<C-H>', [[v:hlsearch ? ":nohlsearch\<CR>" : "\<CR>"]], { expr = true, noremap = true })

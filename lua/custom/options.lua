@@ -51,7 +51,9 @@ vim.opt.tabstop = 2
 --" 不在缓冲区列表中显示未列出缓冲区
 vim.opt.buflisted = false
 --" 切换到已经打开的缓冲区
-vim.opt.switchbuf = useopen
+vim.opt.switchbuf = 'useopen'
+-- 启用系统剪贴板（支持跨应用复制粘贴）
+-- vim.opt.clipboard = 'unnamedplus'
 
 -- 重新定义 当前行和选中的行 的样式
 vim.api.nvim_command 'highlight Visual guifg=White guibg=#0e5e97 gui=none'
