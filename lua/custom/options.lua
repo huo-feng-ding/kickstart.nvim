@@ -41,7 +41,7 @@ vim.opt.mouse = 'a'
 vim.opt.keymodel = 'startsel'
 -- 设定默认解码
 vim.opt.fileencoding = 'utf-8'
-vim.opt.fileencodings = { 'utf-8', 'usc-bom', 'euc-jp', 'gb18030', 'gbk', 'gb2312', 'cp936' }
+vim.opt.fileencodings = { 'utf-8', 'gb18030', 'gbk', 'gb2312', 'cp936', 'usc-bom', 'euc-jp' }
 -- Windows 下 gvim 的 backspace 不起作用配置
 vim.opt.backspace = { 'indent', 'eol', 'start' }
 -- 总是显示标签页
