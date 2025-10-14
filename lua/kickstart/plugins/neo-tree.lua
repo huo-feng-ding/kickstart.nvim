@@ -27,7 +27,7 @@ return {
         else
           local path = vim.fn.expand '%:p'
           local dir = path:sub(1, 1) == '/' and '/' or path:sub(1, 2) .. '/'
-          vim.cmd('Neotree position=current dir=' .. dir .. ' reveal_file=%:p')
+          vim.cmd('Neotree position=current dir=' .. dir .. ' reveal_file=' .. path)
         end
       end,
       desc = 'NeoTree reveal',
