@@ -27,7 +27,8 @@ return {
         else
           local path = vim.fn.expand '%:p'
           local dir = path:sub(1, 1) == '/' and '/' or path:sub(1, 2) .. '/'
-          vim.cmd('Neotree position=current dir=' .. dir .. ' reveal_file=' .. path)
+          local cmd = 'Neotree position=current dir=' .. dir .. ' reveal_file=' .. path:gsub(' ', '\\ ')
+          vim.cmd(cmd)
         end
       end,
       desc = 'NeoTree reveal',
@@ -35,6 +36,9 @@ return {
     },
   },
   opts = {
+    -- true, false, "/path/to/file.log", use ':lua require("neo-tree").show_logs()' to show the file.
+    -- Default location is `vim.fn.stdpath("data") .. "/" .. "neo-tree.nvim.log"`
+    log_to_file = false,
     window = {
       position = 'float',
     },
