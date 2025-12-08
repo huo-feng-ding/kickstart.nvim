@@ -1005,6 +1005,16 @@ require('lazy').setup({
   -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
   -- you can continue same window with `<space>sr` which resumes last telescope search
 }, {
+  git = {
+    timeout = 30000, -- seconds; increase if cloning is slow
+    depth = 1, -- shallow clone to speed up first install
+    partial_clones = true, -- reduce download size
+  },
+  concurrency = 4, -- lower if you hit network/CPU limits
+  checker = {
+    enabled = true,
+    frequency = 3600, -- check for updates less often
+  },
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
