@@ -285,7 +285,143 @@ return {
       keymaps = {
         open_file_in_tab = 'o',
       },
+      set_keymappings_function = function(yazi_buffer_id, config, context)
+        vim.keymap.set({ 't' }, 'e', function()
+          local current_file = vim.api.nvim_buf_get_name(0)
+          if current_file == '' then
+            current_file = nil -- 无文件（如 :enew）
+          else
+            current_file = vim.fn.fnamemodify(current_file, ':p') -- 确保绝对路径
+          end
+          context.api:emit_to_yazi { 'cd', current_file }
+        end)
+      end,
+      --   hooks = {
+      --     yazi_opened = function(preselected_path, yazi_buffer_id, config)
+      --       -- you can optionally modify the config for this specific yazi
+      --       -- invocation if you want to customize the behaviour
+      --       -- local file = io.open('d:\\output.txt', 'a')
+      --       -- file:write 'opend'
+      --       -- file:close()
+      --     end,
+      --     on_yazi_ready = function(buffer, config, process_api)
+      --       -- https://yazi-rs.github.io/docs/configuration/keymap/#manager.find
+      --       -- local file = io.open('d:\\output.txt', 'a')
+      --       -- file:write 'ready3'
+      --       -- file:close()
+      --       -- process_api:emit_to_yazi { 'cd d:', 'd:' }
+      --     end,
+      --   },
     },
+    -- opts = function()
+    --   local openedPath = '/'
+    --   return {
+    --     -- if you want to open yazi instead of netrw, see below for more info
+    --     open_for_directories = false,
+    --     keymaps = {
+    --       show_help = '?',
+    --       open_file_in_vertical_split = '<a-v>',
+    --       open_file_in_horizontal_split = '<a-x>',
+    --       open_file_in_tab = 'o',
+    --       grep_in_directory = '<a-s>',
+    --       replace_in_directory = '<a-g>',
+    --       cycle_open_buffers = '<tab>',
+    --       copy_relative_path_to_selected_files = '<a-y>',
+    --       send_to_quickfix_list = '<a-q>',
+    --       change_working_directory = '<a-\\>',
+    --       open_and_pick_window = '<a-o>',
+    --     },
+    --     set_keymappings_function = function(yazi_buffer_id, config, context)
+    --       -- 重写退出快捷键，因为yazi退出时会projects.yazi插件会将标签页写入文件
+    --       vim.keymap.set({ 't' }, 'q', function()
+    --         context.api:emit_to_yazi { 'quit' }
+    --       end, { buffer = yazi_buffer_id })
+    --
+    --       -- 获取当前文件的父级目录
+    --       -- local function getParentDir(filepath)
+    --       --   -- 统一替换路径分隔符为 '/'
+    --       --   filepath = filepath:gsub('\\', '/')
+    --       --   -- 去除末尾的 '/'（如果有）
+    --       --   filepath = filepath:gsub('/+$', '')
+    --       --   -- 提取父目录
+    --       --   local parent = filepath:match '^(.*)/[^/]+$'
+    --       --   return parent or '.' -- 若没有父目录，返回当前目录 "."
+    --       -- end
+    --
+    --       -- 加载当前打开的文件目录
+    --       vim.keymap.set({ 't' }, 'e', function()
+    --         context.api:emit_to_yazi { 'cd', openedPath }
+    --         -- local path = vim.fn.expand '%'
+    --         -- local words = {}
+    --         -- for word in string.gmatch(path, '%S+') do
+    --         --   table.insert(words, word)
+    --         -- end
+    --         -- local quote_content = words[2]:match '^"(.*)"$'
+    --         -- context.api:emit_to_yazi { 'cd', getParentDir(quote_content) }
+    --
+    --         -- local file = io.open('d:\\output.txt', 'w')
+    --         -- file:write(path)
+    --         -- file:write 'a'
+    --         -- file:write(quote_content)
+    --         -- file:write 'b'
+    --         -- file:write(words[2])
+    --         -- file:write 'c'
+    --         -- for k, v in pairs(config) do
+    --         --   file:write(k, ' ', type(v), ' ') -- 输出变量名和类型（避免打印过大的值）
+    --         --   if type(v) == 'string' then
+    --         --     file:write(v)
+    --         --   end
+    --         --   file:write '\n'
+    --         -- end
+    --         -- file:close()
+    --       end, { buffer = yazi_buffer_id })
+    --     end,
+    --     -- log_level = vim.log.levels.DEBUG,
+    --     hooks = {
+    --       -- This function is called when yazi is ready to process events.
+    --       on_yazi_ready = function(buffer, config, process_api)
+    --         local file = io.open('d:\\output.txt', 'a')
+    --         file:write 'ready2'
+    --         file:close()
+    --         process_api:emit_to_yazi { 'cd', openedPath }
+    --       end,
+    --       yazi_opened = function(preselected_path, yazi_buffer_id, config)
+    --         local file = io.open('d:\\output.txt', 'a')
+    --         file:write 'open'
+    --         file:close()
+    --         -- https://yazi-rs.github.io/docs/configuration/keymap/#manager.find
+    --         -- local function getParentDir(filepath)
+    --         --   -- 统一替换路径分隔符为 '/'
+    --         --   filepath = filepath:gsub('\\', '/')
+    --         --   -- 去除末尾的 '/'（如果有）
+    --         --   filepath = filepath:gsub('/+$', '')
+    --         --   -- 提取父目录
+    --         --   local parent = filepath:match '^(.*)/[^/]+$'
+    --         --   return parent or '/' -- 若没有父目录，返回当前目录 "."
+    --         -- end
+    --         -- openedPath = getParentDir(preselected_path)
+    --         -- local file = io.open('d:\\output.txt', 'w')
+    --         -- file:write(openedPath)
+    --         -- file:write '\n'
+    --         -- file:write(yazi_buffer_id)
+    --         -- file:write '\n'
+    --         -- for k, v in pairs(config) do
+    --         --   file:write(k, type(v)) -- 输出变量名和类型（避免打印过大的值）
+    --         --   file:write '\n'
+    --         -- end
+    --         -- -- -- file:write(config)
+    --         -- file:close()
+    --         -- vim.system({ 'ya', 'emit-to', yazi_buffer_id, path }, { timeout = 1000 })
+    --         -- config:api:emit_to_yazi { 'cd', path }
+    --         -- vim.defer_fn(function()
+    --         --   -- vim.cmd '!ya emit cd c:\\'
+    --         --   print 'aaa'
+    --         --   process_api:emit_to_yazi { 'cd c:\\' }
+    --         -- end, 2000) -- 2000毫秒
+    --       end,
+    --     },
+    --   }
+    -- end,
     -- 👇 if you use `open_for_directories=true`, this is recommended
     init = function()
       -- mark netrw as loaded so it's not loaded at all.

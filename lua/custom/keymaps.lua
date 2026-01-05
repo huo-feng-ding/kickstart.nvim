@@ -153,6 +153,7 @@ if vim.fn.maparg('grt', 'n') ~= '' then
   vim.keymap.del('n', 'grt')
 end
 
+-- 解决在 WSL (Windows Subsystem for Linux) 环境下，Neovim 与 Windows 系统剪贴板无法互通的问题
 local function setup_clipboard()
   if vim.fn.executable 'win32yank.exe' == 1 then
     -- 您的现有配置
