@@ -363,13 +363,14 @@ return {
           open_and_pick_window = '<a-o>',
         },
         set_keymappings_function = function(yazi_buffer_id, config, context)
-          -- 重写退出快捷键，因为yazi退出时会projects.yazi插件会将标签页写入文件
-          vim.keymap.set({ 't' }, 'q', function()
-            context.api:emit_to_yazi { 'quit' }
-          end, { buffer = yazi_buffer_id })
+          -- 重写退出快捷键，因为yazi退出时会projects.yazi插件会将标签页写入文件;
+          -- 2026.01.27 在yazi下使用z快速查询导航时按q键没有输出q字符，因为这里重写了q键的功能，所以换成Ctrl+q，避免冲突，暂时先不起用这个功能
+          -- vim.keymap.set({ 't' }, '<C-q>', function()
+          --   context.api:emit_to_yazi { 'quit' }
+          -- end, { buffer = yazi_buffer_id })
 
-          -- 加载当前打开的文件目录
-          vim.keymap.set({ 't' }, 'e', function()
+          -- 加载当前打开的文件目录, 使用e快捷键的话在z查询导航时输不出e字符，所以改成Ctrl+e
+          vim.keymap.set({ 't' }, '<C-e>', function()
             -- local path = vim.fn.expand '%' -- 因为yazi窗口已经打开了，这里取到的是yazi里的内容，不是nvim的当前标签页的路径
             context.api:emit_to_yazi { 'cd', openedPath }
           end, { buffer = yazi_buffer_id })
@@ -501,10 +502,40 @@ return {
     opts = {
       suggestion = {
         auto_trigger = true,
+        keymap = {
+          accept = false, -- 将接受快捷键改为 Tab
+          accept_word = '<M-l>', -- alt + l 接受单词
+          accept_line = '<M-j>',
+          next = '<M-]>',
+          prev = '<M-[>',
+          dismiss = '<C-]>',
+        },
       },
       panel = {
         enabled = true,
       },
     },
+    config = function(_, opts)
+      require('copilot').setup(opts)
+
+      -- 自定义 Tab 逻辑
+      vim.keymap.set('i', '<Tab>', function()
+        local suggestion = require 'copilot.suggestion'
+        if suggestion.is_visible() then
+          suggestion.accept()
+        else
+          -- 如果没有提示，则输出正常的 Tab 字符
+          -- feedkeys 的参数解释：t 表示按键名解析，n 表示不再次触发映射
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Tab>', true, false, true), 'n', false)
+        end
+      end, { desc = 'Copilot Tab Accept' })
+
+      -- 设置代码提示的文字颜色
+      vim.api.nvim_set_hl(0, 'CopilotSuggestion', {
+        fg = '#458588', -- 这里填入你选定的颜色
+        ctermfg = 8, -- 兼容 256 色终端
+        italic = true, -- 开启斜体，能更明显地将其与正式代码区分开
+      })
+    end,
   },
 }

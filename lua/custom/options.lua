@@ -54,6 +54,8 @@ vim.opt.buflisted = false
 vim.opt.switchbuf = 'useopen'
 -- 启用系统剪贴板（支持跨应用复制粘贴）
 -- vim.opt.clipboard = 'unnamedplus'
+-- tab diffs 命令垂直分割窗口显示
+vim.opt.diffopt:append 'vertical'
 
 -- 重新定义 当前行和选中的行 的样式
 vim.api.nvim_command 'highlight Visual guifg=White guibg=#0e5e97 gui=none'

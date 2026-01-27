@@ -136,6 +136,14 @@ vim.keymap.set('n', '<Leader>N<space>', '?<C-R>+<CR>', { noremap = true })
 
 vim.keymap.set('c', '<C-v>', '<C-R>+', { noremap = true })
 
+-- n当前标签页下，分割一个空白窗口，做差异对比; n 表示 Normal 模式，<C-d> 代表 Ctrl+d
+-- 映射为 <leader>dn (d 代表 diff, n 代表 new)
+vim.keymap.set('n', '<leader>dn', ':vnew | windo diffthis<CR>', { desc = 'Diff with empty buffer' })
+-- 直接对比当前文件和指定文件的差异,我们将 silent 设为 false。这是因为你需要看到命令行弹出的 :vert diffsplit 提示，才能知道接下来要输入路径
+-- 映射为 <leader>df (d 代表 diff, f 代表 file)
+-- 末尾不加 <CR>，方便您直接输入文件名
+vim.keymap.set('n', '<leader>df', ':vert diffsplit ', { desc = 'Diff with file' })
+
 -- 拆分窗口切换
 vim.api.nvim_set_keymap('n', '<A-h>', '<C-w>h', { noremap = true })
 vim.api.nvim_set_keymap('n', '<A-j>', '<C-w>j', { noremap = true })
