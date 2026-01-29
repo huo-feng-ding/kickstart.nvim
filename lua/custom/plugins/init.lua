@@ -353,14 +353,14 @@ return {
           show_help = '?',
           open_file_in_vertical_split = '<a-v>',
           open_file_in_horizontal_split = '<a-x>',
-          open_file_in_tab = 'o',
+          open_file_in_tab = '<a-o>',
           grep_in_directory = '<a-s>',
           replace_in_directory = '<a-g>',
           cycle_open_buffers = '<tab>',
           copy_relative_path_to_selected_files = '<a-y>',
           send_to_quickfix_list = '<a-q>',
           change_working_directory = '<a-\\>',
-          open_and_pick_window = '<a-o>',
+          open_and_pick_window = '<c-o>',
         },
         set_keymappings_function = function(yazi_buffer_id, config, context)
           -- 重写退出快捷键，因为yazi退出时会projects.yazi插件会将标签页写入文件;
@@ -413,23 +413,28 @@ return {
     end,
   },
   {
+    -- 配置参考 https://www.lazyvim.org/plugins/ui#noicenvim
     'folke/noice.nvim',
     event = 'VeryLazy',
     opts = {
       views = {
         -- 定义reg命令展示的视图.下边的routes路由去查找展示的命令结果来指定当前这个视图
-        registers = {
-          backend = 'split',
-          -- 弹出窗口自动关闭时间
-          timeout = 10000,
-          win_options = {
-            -- 弹出窗口的透明度0表示不透明
-            winblend = 0,
-          },
-          close = {
-            keys = { 'q', '<Esc>' },
-          },
-        },
+        -- registers = {
+        --   backend = 'split',
+        --   -- 弹出窗口自动关闭时间
+        --   timeout = 10000,
+        --   win_options = {
+        --     -- 弹出窗口的透明度0表示不透明
+        --     winblend = 0,
+        --   },
+        --   enter = true, -- 自动将光标跳转到分栏中，方便翻页和搜索
+        --   close = {
+        --     keys = { 'q', '<Esc>' },
+        --   },
+        -- },
+        -- split = {
+        --   enter = true, -- 自动将光标跳转到分栏中，方便翻页和搜索
+        -- },
         mini = {
           -- 弹出窗口自动关闭时间
           timeout = 5000,
@@ -453,18 +458,34 @@ return {
               { find = '; before #%d+' },
               -- 恢复操作时的提示
               { find = '; after #%d+' },
+              -- 复制文件时的提示
+              { find = 'lines yanked into' },
+              -- easymotion
+              { find = 'Target key' },
+              { find = 'EasyMotion' },
             },
           },
           view = 'mini',
         },
+        -- 捕获绝大多数命令的输出
         {
           filter = {
             event = 'msg_show',
+            -- 排除掉没有内容的空消息
+            -- 并且确保它不是 mini 类型的小提示
             any = {
-              { find = 'Type Name Content' },
+              { kind = '' }, -- 绝大多数 :命令 的输出 kind 为空字符串
+              { kind = 'echo' }, -- 使用 :echo 输出的内容
+              { kind = 'echomsg' }, -- 使用 :echomsg 输出的内容
+              { kind = 'list_cmd' }, -- 使用 :list_cmd 输出的内容
             },
           },
-          view = 'registers',
+          view = 'split', -- 统一使用分栏视图
+          opts = {
+            enter = true, -- 执行完命令后光标自动跳进 split 窗口，方便翻页和退出
+            -- 强制覆盖 Noice 的默认拦截逻辑
+            -- format = { '{message}' },
+          },
         },
       },
       presets = {
