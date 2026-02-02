@@ -53,18 +53,14 @@ vim.keymap.set({ 'n', 'i', 'v' }, '<C-s>', function()
       cwd = cwd .. sep
     end
     local filename = vim.fn.input('Save to: ', cwd, 'file')
-    if filename ~= '' then
-      vim.cmd('write ' .. filename)
-    end
+    if filename ~= '' then vim.cmd('write ' .. filename) end
   else
     vim.cmd 'w'
   end
 end, { desc = 'Save file' })
 
 -- 终端兼容：将 Ctrl-s 转义序列绑定到保存
-if vim.fn.has 'terminal' == 1 then
-  vim.keymap.set('t', '<C-s>', [[<C-\><C-n>:w<CR>]], { noremap = true })
-end
+if vim.fn.has 'terminal' == 1 then vim.keymap.set('t', '<C-s>', [[<C-\><C-n>:w<CR>]], { noremap = true }) end
 
 -- 使用 leader 键进行复制粘贴
 vim.keymap.set('v', '<leader>y', '"+y', { noremap = true })
@@ -136,6 +132,19 @@ vim.keymap.set('n', '<Leader>N<space>', '?<C-R>+<CR>', { noremap = true })
 
 vim.keymap.set('c', '<C-v>', '<C-R>+', { noremap = true })
 
+-- 向下滚动 1/3 屏幕 (对应 Ctrl-e)
+vim.keymap.set('n', '<Leader>d', function()
+    local lines = math.floor(vim.api.nvim_win_get_height(0) / 3)
+    vim.cmd("normal! " .. lines .. "\x05") -- \x05 是 Ctrl-e 的转义码
+end, { silent = true, desc = "Scroll down 1/3 screen" })
+
+-- 向上滚动 1/3 屏幕 (对应 Ctrl-y)
+vim.keymap.set('n', '<Leader>u', function()
+    local lines = math.floor(vim.api.nvim_win_get_height(0) / 3)
+    vim.cmd("normal! " .. lines .. "\x19") -- \x19 是 Ctrl-y 的转义码
+end, { silent = true, desc = "Scroll up 1/3 screen" })
+
+
 -- n当前标签页下，分割一个空白窗口，做差异对比; n 表示 Normal 模式，<C-d> 代表 Ctrl+d
 -- 映射为 <leader>dn (d 代表 diff, n 代表 new)
 vim.keymap.set('n', '<leader>dn', ':vnew | windo diffthis<CR>', { desc = 'Diff with empty buffer' })
@@ -150,16 +159,13 @@ vim.api.nvim_set_keymap('n', '<A-j>', '<C-w>j', { noremap = true })
 vim.api.nvim_set_keymap('n', '<A-k>', '<C-w>k', { noremap = true })
 vim.api.nvim_set_keymap('n', '<A-l>', '<C-w>l', { noremap = true })
 
+-- 映射 Ctrl+Backspace 删除前一个单词
+vim.api.nvim_set_keymap('i', '<A-BS>', '<C-w>', { noremap = true })
+
 -- vim-ReplaceWithRegister插件的gr命令和lsp插件有冲突; 2025-07-11在init.lua的lsp配置中已经将下边这两个快捷键注释掉了，所以下边的也不用去删除了。这里先保持注释以便日后知道有这么个问题。 In Neovim, there's an overlap with LSP-related commands, and if you want to use the plugin's gr{motion} with inner/outer text objects, you need to remove (and optionally remap) the gra and gri commands:
-if vim.fn.maparg('gra', 'n') ~= '' then
-  vim.keymap.del('n', 'gra')
-end
-if vim.fn.maparg('gri', 'n') ~= '' then
-  vim.keymap.del('n', 'gri')
-end
-if vim.fn.maparg('grt', 'n') ~= '' then
-  vim.keymap.del('n', 'grt')
-end
+if vim.fn.maparg('gra', 'n') ~= '' then vim.keymap.del('n', 'gra') end
+if vim.fn.maparg('gri', 'n') ~= '' then vim.keymap.del('n', 'gri') end
+if vim.fn.maparg('grt', 'n') ~= '' then vim.keymap.del('n', 'grt') end
 
 -- 解决在 WSL (Windows Subsystem for Linux) 环境下，Neovim 与 Windows 系统剪贴板无法互通的问题
 local function setup_clipboard()

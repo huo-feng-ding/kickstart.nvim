@@ -22,7 +22,7 @@ vim.opt.incsearch = true
 vim.opt.showmode = true
 -- 设置超时时间
 vim.opt.timeout = true
-vim.opt.timeoutlen = 500
+vim.opt.timeoutlen = 1500
 -- 忽略大小写
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
@@ -56,6 +56,17 @@ vim.opt.switchbuf = 'useopen'
 -- vim.opt.clipboard = 'unnamedplus'
 -- tab diffs 命令垂直分割窗口显示
 vim.opt.diffopt:append 'vertical'
+
+-- 开启标题显示
+vim.opt.title = true
+-- 自定义标题格式，加上 [NVIM] 前缀方便 AHK 识别
+vim.opt.titlestring = "[NVIM] %t" 
+-- (可选) 退出时确保标题被清理（虽然 Terminal 通常会自动处理）
+vim.api.nvim_create_autocmd("VimLeave", {
+    callback = function()
+        vim.opt.titlestring = ""
+    end
+})
 
 -- 重新定义 当前行和选中的行 的样式
 vim.api.nvim_command 'highlight Visual guifg=White guibg=#0e5e97 gui=none'

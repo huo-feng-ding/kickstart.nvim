@@ -47,9 +47,7 @@ return {
       vim.api.nvim_create_autocmd('User', {
         pattern = 'EasyMotionPromptEnd',
         callback = function()
-          if vim.g.waiting_for_easy_motion then
-            return
-          end
+          if vim.g.waiting_for_easy_motion then return end
           vim.g.waiting_for_easy_motion = true
           check_easymotion()
         end,
@@ -75,9 +73,7 @@ return {
   },
   {
     'inkarkat/vim-ReplaceWithRegister',
-    config = function()
-      vim.api.nvim_set_keymap('n', '<Leader>gr', '"+gr', { noremap = false, silent = true })
-    end,
+    config = function() vim.api.nvim_set_keymap('n', '<Leader>gr', '"+gr', { noremap = false, silent = true }) end,
   },
   {
     'machakann/vim-highlightedyank',
@@ -122,9 +118,7 @@ return {
                 cwd = cwd .. sep
               end
               local filename = vim.fn.input('Save to: ', cwd, 'file')
-              if filename ~= '' then
-                vim.cmd('wq ' .. filename)
-              end
+              if filename ~= '' then vim.cmd('wq ' .. filename) end
             else
               vim.cmd 'wq'
             end
@@ -439,6 +433,10 @@ return {
           -- 弹出窗口自动关闭时间
           timeout = 5000,
         },
+        split = {
+          enter = true, -- 执行完命令后光标自动跳进 split 窗口，方便翻页和退出
+          size = 20, -- 设置高度为 20 行（默认通常较小）
+        },
       },
       lsp = {
         override = {
@@ -448,25 +446,6 @@ return {
         },
       },
       routes = {
-        {
-          filter = {
-            event = 'msg_show',
-            any = {
-              -- 保存操作时的提示
-              { find = '%d+L, %d+B' },
-              -- 撤销修改时的提示
-              { find = '; before #%d+' },
-              -- 恢复操作时的提示
-              { find = '; after #%d+' },
-              -- 复制文件时的提示
-              { find = 'lines yanked into' },
-              -- easymotion
-              { find = 'Target key' },
-              { find = 'EasyMotion' },
-            },
-          },
-          view = 'mini',
-        },
         -- 捕获绝大多数命令的输出
         {
           filter = {
@@ -474,19 +453,41 @@ return {
             -- 排除掉没有内容的空消息
             -- 并且确保它不是 mini 类型的小提示
             any = {
-              { kind = '' }, -- 绝大多数 :命令 的输出 kind 为空字符串
-              { kind = 'echo' }, -- 使用 :echo 输出的内容
-              { kind = 'echomsg' }, -- 使用 :echomsg 输出的内容
+              -- { kind = '' }, -- 绝大多数 :命令 的输出 kind 为空字符串
+              -- { kind = 'echo' }, -- 使用 :echo 输出的内容
+              -- { kind = 'echomsg' }, -- 使用 :echomsg 输出的内容
               { kind = 'list_cmd' }, -- 使用 :list_cmd 输出的内容
+              { find = 'mark line  col file/text' }, -- 匹配 :marks 输出的表头
             },
           },
           view = 'split', -- 统一使用分栏视图
-          opts = {
-            enter = true, -- 执行完命令后光标自动跳进 split 窗口，方便翻页和退出
-            -- 强制覆盖 Noice 的默认拦截逻辑
-            -- format = { '{message}' },
-          },
+          -- opts = {
+          --   enter = true, -- 执行完命令后光标自动跳进 split 窗口，方便翻页和退出
+          --   size = 20, -- 设置高度为 20 行（默认通常较小）
+          -- },
         },
+        -- {
+        --   filter = {
+        --     event = 'msg_show',
+        -- any = {
+        --   -- 保存操作时的提示
+        --   { find = '%d+L, %d+B' },
+        --   -- 撤销修改时的提示
+        --   { find = '; before #%d+' },
+        --   -- 恢复操作时的提示
+        --   { find = '; after #%d+' },
+        --   -- 复制文件时的提示
+        --   { find = 'lines yanked into' },
+        --   { find = 'fewer lines' },
+        --   { find = 'more lines' },
+        --   { find = 'lines yanked' },
+        --   -- easymotion
+        --   { find = 'Target key' },
+        --   { find = 'EasyMotion' },
+        -- },
+        --   },
+        --   view = 'mini',
+        -- },
       },
       presets = {
         bottom_search = true,
@@ -510,9 +511,7 @@ return {
       -- HACK: noice shows messages from before it was enabled,
       -- but this is not ideal when Lazy is installing plugins,
       -- so clear the messages in this case.
-      if vim.o.filetype == 'lazy' then
-        vim.cmd [[messages clear]]
-      end
+      if vim.o.filetype == 'lazy' then vim.cmd [[messages clear]] end
       require('noice').setup(opts)
     end,
   },
