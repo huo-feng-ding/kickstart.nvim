@@ -1,6 +1,8 @@
 -- Neo-tree is a Neovim plugin to browse the file system
 -- https://github.com/nvim-neo-tree/neo-tree.nvim
 
+---@module 'lazy'
+---@type LazySpec
 return {
   'nvim-neo-tree/neo-tree.nvim',
   version = '*',
@@ -35,6 +37,8 @@ return {
       silent = true,
     },
   },
+  ---@module 'neo-tree'
+  ---@type neotree.Config
   opts = {
     -- true, false, "/path/to/file.log", use ':lua require("neo-tree").show_logs()' to show the file.
     -- Default location is `vim.fn.stdpath("data") .. "/" .. "neo-tree.nvim.log"`
