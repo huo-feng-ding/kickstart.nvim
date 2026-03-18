@@ -216,22 +216,23 @@ return {
                 tab_modified(tab, tab.id, hl),
               }
             end),
-            line.spacer(),
-            line.wins_in_tab(line.api.get_current_tab()).foreach(function(win)
-              return {
-                line.sep('', theme.win, theme.fill),
-                --win.is_current() and '' or '',
-                buf_modified(win.buf().id),
-                win.buf_name(),
-                line.sep('', theme.win, theme.fill),
-                hl = theme.win,
-                margin = ' ',
-              }
-            end),
-            {
-              line.sep('', theme.tail, theme.fill),
-              { '  ', hl = theme.tail },
-            },
+            -- 最右侧不让显示当前标签激活的文件名
+            -- line.spacer(),
+            -- line.wins_in_tab(line.api.get_current_tab()).foreach(function(win)
+            --   return {
+            --     line.sep('', theme.win, theme.fill),
+            --     --win.is_current() and '' or '',
+            --     buf_modified(win.buf().id),
+            --     win.buf_name(),
+            --     line.sep('', theme.win, theme.fill),
+            --     hl = theme.win,
+            --     margin = ' ',
+            --   }
+            -- end),
+            -- {
+            --   line.sep('', theme.tail, theme.fill),
+            --   { '  ', hl = theme.tail },
+            -- },
             hl = theme.fill,
           }
         end,
@@ -558,4 +559,8 @@ return {
       })
     end,
   },
+  -- {
+  --   -- neovide 对ime输入法支持(2026.03.18 试用后支持不好，暂时注释掉)
+  --   'sevenc-nanashi/neov-ime.nvim',
+  -- },
 }

@@ -124,6 +124,15 @@ vim.keymap.set('', '<C-t>', ':tabnew<CR>', { noremap = true })
 -- 关闭标签页快捷键
 vim.keymap.set('', '<C-w>', ':close<CR>', { noremap = true })
 
+-- -- 插入模式下粘贴
+-- vim.keymap.set('i', '<S-Insert>', '<C-R>+')
+-- -- 普通模式下粘贴
+-- vim.keymap.set('n', '<S-Insert>', '"+P')
+-- -- 命令行模式下粘贴
+-- vim.keymap.set('c', '<S-Insert>', '<C-R>+')
+-- -- 可视模式下替换粘贴
+-- vim.keymap.set('v', '<S-Insert>', '"+P')
+
 -- 从寄存器或系统剪切板里查找
 vim.keymap.set('n', '<Leader>nn', '/<C-R>"<CR>', { noremap = true })
 vim.keymap.set('n', '<Leader>n<space>', '/<C-R>+<CR>', { noremap = true })
@@ -134,16 +143,15 @@ vim.keymap.set('c', '<C-v>', '<C-R>+', { noremap = true })
 
 -- 向下滚动 1/3 屏幕 (对应 Ctrl-e)
 vim.keymap.set('n', '<Leader>d', function()
-    local lines = math.floor(vim.api.nvim_win_get_height(0) / 3)
-    vim.cmd("normal! " .. lines .. "\x05") -- \x05 是 Ctrl-e 的转义码
-end, { silent = true, desc = "Scroll down 1/3 screen" })
+  local lines = math.floor(vim.api.nvim_win_get_height(0) / 3)
+  vim.cmd('normal! ' .. lines .. '\x05') -- \x05 是 Ctrl-e 的转义码
+end, { silent = true, desc = 'Scroll down 1/3 screen' })
 
 -- 向上滚动 1/3 屏幕 (对应 Ctrl-y)
 vim.keymap.set('n', '<Leader>u', function()
-    local lines = math.floor(vim.api.nvim_win_get_height(0) / 3)
-    vim.cmd("normal! " .. lines .. "\x19") -- \x19 是 Ctrl-y 的转义码
-end, { silent = true, desc = "Scroll up 1/3 screen" })
-
+  local lines = math.floor(vim.api.nvim_win_get_height(0) / 3)
+  vim.cmd('normal! ' .. lines .. '\x19') -- \x19 是 Ctrl-y 的转义码
+end, { silent = true, desc = 'Scroll up 1/3 screen' })
 
 -- n当前标签页下，分割一个空白窗口，做差异对比; n 表示 Normal 模式，<C-d> 代表 Ctrl+d
 -- 映射为 <leader>dn (d 代表 diff, n 代表 new)
@@ -166,6 +174,53 @@ vim.api.nvim_set_keymap('i', '<A-BS>', '<C-w>', { noremap = true })
 if vim.fn.maparg('gra', 'n') ~= '' then vim.keymap.del('n', 'gra') end
 if vim.fn.maparg('gri', 'n') ~= '' then vim.keymap.del('n', 'gri') end
 if vim.fn.maparg('grt', 'n') ~= '' then vim.keymap.del('n', 'grt') end
+
+-- 普通模式下：注释/取消注释当前行
+vim.keymap.set('n', '<C-_>', 'gcc', { remap = true, desc = 'Toggle line comment' })
+vim.keymap.set('n', '<C-/>', 'gcc', { remap = true, desc = 'Toggle line comment' })
+
+-- 插入模式下：注释当前行并保持在插入模式
+-- 这里先回到普通模式执行 gcc，再返回插入模式,光标处在行尾
+-- vim.keymap.set('i', '<C-_>', '<Esc>gccA', { remap = true, desc = 'Toggle line comment' })
+-- vim.keymap.set('i', '<C-/>', '<Esc>gccA', { remap = true, desc = 'Toggle line comment' })
+
+-- 插入模式下注释当前行：先切换成普通模式，进行注释操作，，再切换回插入模式，并且保持光标位置不变
+local function toggle_comment_insert_mode()
+  local win = vim.api.nvim_get_current_win()
+  local cursor = vim.api.nvim_win_get_cursor(win)
+  local old_line_len = #vim.api.nvim_get_current_line()
+
+  -- 1. 退出插入模式
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
+
+  -- 2. 调度执行注释
+  vim.schedule(function()
+    vim.cmd 'normal gcc'
+
+    -- 3. 再次调度：计算偏移并恢复
+    vim.schedule(function()
+      if vim.api.nvim_win_is_valid(win) then
+        local new_line_len = #vim.api.nvim_get_current_line()
+        -- 计算长度差：新长度 - 旧长度
+        -- 如果是注释，偏移量为正；如果是取消注释，偏移量为负
+        local diff = new_line_len - old_line_len
+
+        -- 更新光标列位置，确保不小于 0
+        local new_col = math.max(0, cursor[2] + diff)
+
+        vim.api.nvim_win_set_cursor(win, { cursor[1], new_col })
+        vim.cmd 'startinsert'
+      end
+    end)
+  end)
+end
+-- 插入模式下注释当前行
+vim.keymap.set('i', '<C-/>', toggle_comment_insert_mode, { desc = 'Toggle comment with offset' })
+vim.keymap.set('i', '<C-_>', toggle_comment_insert_mode, { desc = 'Toggle comment with offset' })
+
+-- 可选：可视模式下（按行注释选择的部分）
+vim.keymap.set('v', '<C-_>', 'gc', { remap = true, desc = 'Toggle comment for selection' })
+vim.keymap.set('v', '<C-/>', 'gc', { remap = true, desc = 'Toggle comment for selection' })
 
 -- 解决在 WSL (Windows Subsystem for Linux) 环境下，Neovim 与 Windows 系统剪贴板无法互通的问题
 local function setup_clipboard()

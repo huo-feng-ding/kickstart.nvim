@@ -824,6 +824,23 @@ require('lazy').setup({
             bg = '#b6a014',
             fg = '#fafafa',
           }
+          -- 新增：修改 TabBar 颜色
+          -- TabLine: 未激活的标签页（让文字亮一点，背景深一点）
+          highlights.TabLine = {
+            -- fg = colors.fg_gutter, -- 使用主题内置的灰色，或者直接填 '#bbbbbb'
+            fg = '#bbbbbb',
+            bg = colors.bg_statusline, -- 使用深色背景
+          }
+          -- TabLineSel: 当前激活的标签页（让它非常显眼）
+          -- highlights.TabLineSel = {
+          --   fg = colors.orange, -- 使用主题的橙色（或者用 colors.blue/colors.magenta）
+          --   bg = colors.bg_highlight,
+          --   bold = true,
+          -- }
+          -- TabLineFill: 标签栏剩余部分的背景
+          -- highlights.TabLineFill = {
+          --   bg = colors.bg_dark,
+          -- }
         end,
       }
 
