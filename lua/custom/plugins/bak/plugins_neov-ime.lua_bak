@@ -1,0 +1,6 @@
+return {
+  {
+    -- neovide 对ime输入法支持(2026.03.18 试用后支持不好，暂时注释掉)
+    'sevenc-nanashi/neov-ime.nvim',
+  },
+}
