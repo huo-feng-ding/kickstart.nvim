@@ -782,6 +782,10 @@ require('lazy').setup({
 
       sources = {
         default = { 'lsp', 'path', 'snippets' },
+        -- CodeCompanion：在聊天窗口内启用 / 斜杠命令和 @ 变量补全
+        per_filetype = {
+          codecompanion = { 'codecompanion' },
+        },
       },
 
       snippets = { preset = 'luasnip' },
