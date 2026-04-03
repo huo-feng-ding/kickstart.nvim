@@ -49,10 +49,40 @@ return {
       },
     },
     routes = {
+      -- 添加这条规则来过滤掉粘贴/删除行数的提示
+      -- 核心原因：report 选项
+      -- Neovim 内部有一个参数叫做 report。它的作用是设定一个阈值：当一行命令影响的行数超过这个阈值时，Neovim 就会在状态栏显示提示信息。
+      -- 默认值： 通常是 2。
+      -- 逻辑： * 如果你粘贴了 2 行 或更少，Neovim 觉得这只是小操作，保持安静。
+      -- 如果你粘贴了 3 行 或更多，超过了默认的阈值，它就会跳出提示：3 more lines。
+      -- {
+      --   filter = {
+      --     event = 'msg_show',
+      --     -- 使用正则匹配：数字 + more lines / fewer lines
+      --     -- 这样可以同时过滤掉粘贴和删除行的提示
+      --     any = {
+      --       { find = '%d+ more lines' },
+      --       { find = '%d+ fewer lines' },
+      --       { find = '%d+ lines yanked' },
+      --     },
+      --   },
+      --   -- opts = { skip = true }, -- 直接跳过，不显示
+      --   view = 'mini', -- 不开大窗口，只在角落闪一下
+      -- },
       -- 捕获绝大多数命令的输出
       {
         filter = {
           event = 'msg_show',
+          -- 👇 新增：排除掉包含 "more lines" 的消息,这里的功能和上边配的规则效果一样
+          -- 注意：因为 not 是 Lua 的关键字，作为 key 时建议加上引号和中括号
+          ['not'] = {
+            any = {
+              { find = '%d+ more lines' },
+              { find = '%d+ fewer lines' },
+              { find = '%d+ lines yanked' },
+            },
+          },
+          -- 👆 排除结束
           -- 排除掉没有内容的空消息
           -- 并且确保它不是 mini 类型的小提示
           any = {

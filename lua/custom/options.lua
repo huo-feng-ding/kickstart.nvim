@@ -65,6 +65,9 @@ vim.api.nvim_create_autocmd('VimLeave', {
   callback = function() vim.opt.titlestring = '' end,
 })
 
+-- Set the C compiler to gcc for Windows
+if vim.fn.has 'win32' == 1 then vim.env.CC = 'gcc' end
+
 -- 重新定义 当前行和选中的行 的样式
 vim.api.nvim_command 'highlight Visual guifg=White guibg=#0e5e97 gui=none'
 vim.api.nvim_command 'highlight CursorLine cterm=NONE ctermbg=black ctermfg=green guibg=#064470 guifg=NONE'
@@ -73,16 +76,18 @@ vim.api.nvim_command 'highlight CursorLine cterm=NONE ctermbg=black ctermfg=gree
 vim.opt.guifont = 'Cascadia Code PL:h12:cANSI:qDRAFT'
 
 -- 打开文件时恢复上一次光标所在位置
--- vim.api.nvim_create_autocmd("BufReadPost", {
---   pattern = "*",
---   command = [[if line("'\"") > 1 && line("'\"") <= line("$") | execute "normal! g`\"" | endif]],
--- })
 vim.api.nvim_create_autocmd('BufReadPost', {
-  callback = function()
-    local line = vim.fn.line '\'"'
-    if line > 1 and line <= vim.fn.line '$' then vim.cmd.normal 'g\'"' end
-  end,
+  pattern = '*',
+  command = [[if line("'\"") > 1 && line("'\"") <= line("$") | execute "normal! g`\"" | endif]],
 })
+-- 下边的配置虽然是等价的，但是在neovide中使用powershell profile 中的n函数打开第二个标签页文件时没有恢复上次光标所在位置
+-- vim.api.nvim_create_autocmd('BufReadPost', {
+--   pattern = '*',
+--   callback = function()
+--     local line = vim.fn.line '\'"'
+--     if line > 1 and line <= vim.fn.line '$' then vim.cmd.normal 'g\'"' end
+--   end,
+-- })
 
 -- 禁止在新行中自动添加注释符号
 vim.api.nvim_create_autocmd('FileType', {
