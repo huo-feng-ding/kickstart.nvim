@@ -80,6 +80,7 @@ return {
               { find = '%d+ more lines' },
               { find = '%d+ fewer lines' },
               { find = '%d+ lines yanked' },
+              { find = '%d+ lines >ed %d+ time' },
             },
           },
           -- 👆 排除结束
