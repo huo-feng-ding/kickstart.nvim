@@ -73,10 +73,21 @@ vim.keymap.set('n', '<leader>p', '"+p', { noremap = true })
 vim.keymap.set('n', '<leader>P', '"+P', { noremap = true })
 
 -- 复制文件名、路径等到系统剪贴板
+-- <leader>fn: 复制当前文件名（不含路径）到剪贴板
+--   示例：/path/to/file.txt -> file.txt
 vim.keymap.set('n', '<leader>fn', ':let @+ = expand("%:t") | echo "cb> " . @+<CR>', { noremap = true })
+
+-- <leader>fp: 复制当前文件的完整绝对路径到剪贴板
+--   示例：/path/to/file.txt -> /path/to/file.txt
 vim.keymap.set('n', '<Leader>fp', ':let @+ = expand("%:p") | echo "cb> " . @+<CR>', { noremap = true })
+
+-- <leader>dp: 复制当前文件所在目录的完整路径到剪贴板
+--   示例：/path/to/file.txt -> /path/to
 vim.keymap.set('n', '<Leader>dp', ':let @+ = expand("%:p:h") | echo "cb> " . @+<CR>', { noremap = true })
-vim.keymap.set('n', '<Leader>dn', ':let @+ = expand("%:p:h:t") | echo "cb> " . @+<CR>', { noremap = true })
+
+-- <leader>dd: 复制当前文件所在目录的名称到剪贴板（dir name Yield）
+--   示例：/path/to/file.txt -> to
+vim.keymap.set('n', '<Leader>dd', ':let @+ = expand("%:p:h:t") | echo "cb> " . @+<CR>', { noremap = true })
 
 -- 修改粘贴行为
 vim.keymap.set('x', 'p', 'p:let @"=@0<CR>', { silent = true })
