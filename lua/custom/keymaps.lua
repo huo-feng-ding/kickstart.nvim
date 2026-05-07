@@ -265,3 +265,20 @@ local function setup_clipboard()
   end
 end
 setup_clipboard()
+
+-- 实现 Ctrl + 鼠标左键 点击打开链接
+vim.keymap.set('n', '<C-LeftMouse>', function()
+  -- 获取鼠标点击的窗口和行列位置
+  local mouse_pos = vim.fn.getmousepos()
+
+  -- 检查点击是否在有效的普通窗口内（排除侧边栏、浮动窗等）
+  if mouse_pos.winid == 0 or vim.api.nvim_win_get_config(mouse_pos.winid).relative ~= '' then return end
+
+  -- 1. 切换到点击的窗口
+  vim.api.nvim_set_current_win(mouse_pos.winid)
+  -- 2. 将光标移动到点击的行和列
+  vim.api.nvim_win_set_cursor(mouse_pos.winid, { mouse_pos.line, mouse_pos.column - 1 })
+
+  -- 3. 执行打开链接的命令
+  vim.cmd 'normal gx'
+end, { desc = 'Move cursor and open URL under mouse' })

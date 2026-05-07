@@ -1,0 +1,129 @@
+-- tabby.nvim - 标签页美化
+-- 快捷键：
+--   <A-t>      新建标签页
+--   <A-w>      智能关闭标签页
+--   <A-1~9>    切换到第 1~9 个标签页
+--   <A-0>      切换到上一个标签页
+
+vim.pack.add { 'https://github.com/nanozuki/tabby.nvim' }
+
+-- ── 1. 智能关闭命令 (SmartTabClose) ─────────────────────────────
+vim.api.nvim_create_user_command('SmartTabClose', function()
+      -- local current_tab = vim.fn.tabpagenr() -- 当前标签页序号
+      -- local total_tabs = vim.fn.tabpagenr '$' -- 总标签页数
+      -- local function close()
+      --   if total_tabs == 1 then
+      --     vim.cmd 'q' -- 仅剩一个标签页时退出
+      --   else
+      --     vim.cmd 'tabclose' -- 否则关闭当前标签页
+      --   end
+      -- end
+      
+    local bufnr = vim.api.nvim_get_current_buf()
+    local buf_modified = vim.api.nvim_get_option_value('modified', { buf = bufnr })
+    
+    if buf_modified then
+        -- 弹窗提示用户选择
+        local choice = vim.fn.confirm('文件未保存，是否保存？', '&Save\n&Discard\n&Cancel', 2)
+        if choice == 1 then -- Save
+            local bufname = vim.api.nvim_buf_get_name(0)
+            if bufname == '' or bufname:match '^term://' then
+            -- 空缓冲区或终端缓冲区
+                local cwd = vim.fn.getcwd()
+            -- 判断路径是否以分隔符结尾
+                local is_ends_with_sep = cwd:match '[\\/]$' ~= nil
+                if not is_ends_with_sep then
+                    cwd = cwd .. vim.fs.get_separator()
+                end
+                local filename = vim.fn.input('Save to: ', cwd, 'file')
+                if filename ~= '' then vim.cmd('wq ' .. filename) end
+            else
+                vim.cmd 'wq'
+            end
+        elseif choice == 2 then -- Discard
+            vim.cmd 'q!'
+        end -- Cancel
+    else
+        vim.cmd 'q!'
+    end
+end, { desc = '智能关闭标签页,仅剩一个时退出，否则关闭当前页' })
+
+-- ── 2. 快捷键映射 ────────────────────────────────────────────────
+local map = vim.keymap.set
+map({ 'n', 'i' }, '<A-t>', '<Cmd>tabnew<CR>')
+map({ 'n', 'i' }, '<A-w>', '<Cmd>SmartTabClose<CR>')
+-- 快速切换 (1-9)
+for i = 1, 9 do
+    map({ 'n', 'i' }, '<A-' .. i .. '>', '<Cmd>normal! ' .. i .. 'gt<CR>')
+end
+map({ 'n', 'i' }, '<A-0>', '<Cmd>normal! g<Tab><CR>')
+
+-- ── 3. Tabby UI 渲染配置 ─────────────────────────────────────────
+local theme = {
+    fill = 'TabLineFill',
+    head = 'TabLine',
+    current_tab = 'TabLineSel',
+    tab = 'TabLine',
+    win = 'TabLine',
+    tail = 'TabLine',
+}
+
+local function tab_modified(line, tab, tabId, hl)
+    local wins = require('tabby.module.api').get_tab_wins(tabId)
+    local has_modified = false
+    for _, x in pairs(wins) do
+        if vim.bo[vim.api.nvim_win_get_buf(x)].modified then
+            has_modified = true
+            break
+        end
+    end
+
+    return {
+        line.sep('', hl, theme.fill),
+        '%' .. tab.number() .. 'T',
+        has_modified and '●' or '',
+        tab.in_jump_mode() and tab.jump_key() or tab.number(),
+        tab.name(),
+        tab.close_btn '',
+        line.sep('', hl, theme.fill),
+        hl = hl,
+        margin = ' ',
+    }
+end
+
+require('tabby').setup({
+    line = function(line)
+        return {
+            {
+                { '  ', hl = theme.head },
+                line.sep('', theme.head, theme.fill),
+            },
+            line.tabs().foreach(function(tab)
+                local hl = tab.is_current() and theme.current_tab or theme.tab
+                return { tab_modified(line, tab, tab.id, hl) }
+            end),
+          -- 最右侧不让显示当前标签激活的文件名
+          -- line.spacer(),
+          -- line.wins_in_tab(line.api.get_current_tab()).foreach(function(win)
+          --   return {
+          --     line.sep('', theme.win, theme.fill),
+          --     --win.is_current() and '' or '',
+          --     buf_modified(win.buf().id),
+          --     win.buf_name(),
+          --     line.sep('', theme.win, theme.fill),
+          --     hl = theme.win,
+          --     margin = ' ',
+          --   }
+          -- end),
+          -- {
+          --   line.sep('', theme.tail, theme.fill),
+          --   { '  ', hl = theme.tail },
+          -- },
+            hl = theme.fill,
+        }
+    end,
+    option = {
+        buf_name = { mode = 'unique' },
+    },
+})
+

@@ -122,7 +122,7 @@ do
   --  Schedule the setting after `UiEnter` because it can increase startup-time.
   --  Remove this option if you want your OS clipboard to remain independent.
   --  See `:help 'clipboard'`
-  vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
+  -- vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
 
   -- Enable break indent
   vim.o.breakindent = true
@@ -245,6 +245,8 @@ do
     group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
     callback = function() vim.hl.on_yank() end,
   })
+  
+  require 'custom'
 end
 
 -- ============================================================
@@ -389,6 +391,35 @@ do
     styles = {
       comments = { italic = false }, -- Disable italics in comments
     },
+    on_highlights = function(highlights, colors)
+        highlights.Visual = {
+            bg = '#0e5e97',
+        }
+        highlights.CursorLine = {
+            bg = '#064470',
+        }
+        highlights.IncSearch = {
+            bg = '#b6a014',
+            fg = '#fafafa',
+        }
+        -- 新增：修改 TabBar 颜色
+        -- TabLine: 未激活的标签页（让文字亮一点，背景深一点）
+        highlights.TabLine = {
+            -- fg = colors.fg_gutter, -- 使用主题内置的灰色，或者直接填 '#bbbbbb'
+            fg = '#bbbbbb',
+            bg = colors.bg_statusline, -- 使用深色背景
+        }
+        -- TabLineSel: 当前激活的标签页（让它非常显眼）
+        -- highlights.TabLineSel = {
+        --   fg = colors.orange, -- 使用主题的橙色（或者用 colors.blue/colors.magenta）
+        --   bg = colors.bg_highlight,
+        --   bold = true,
+        -- }
+        -- TabLineFill: 标签栏剩余部分的背景
+        -- highlights.TabLineFill = {
+        --   bg = colors.bg_dark,
+        -- }
+    end,      
   }
 
   -- Load the colorscheme here.
@@ -525,16 +556,16 @@ do
       local buf = event.buf
 
       -- Find references for the word under your cursor.
-      vim.keymap.set('n', 'grr', builtin.lsp_references, { buffer = buf, desc = '[G]oto [R]eferences' })
+      -- vim.keymap.set('n', 'grr', builtin.lsp_references, { buffer = buf, desc = '[G]oto [R]eferences' })
 
       -- Jump to the implementation of the word under your cursor.
       -- Useful when your language has ways of declaring types without an actual implementation.
-      vim.keymap.set('n', 'gri', builtin.lsp_implementations, { buffer = buf, desc = '[G]oto [I]mplementation' })
+      -- vim.keymap.set('n', 'gri', builtin.lsp_implementations, { buffer = buf, desc = '[G]oto [I]mplementation' })
 
       -- Jump to the definition of the word under your cursor.
       -- This is where a variable was first declared, or where a function is defined, etc.
       -- To jump back, press <C-t>.
-      vim.keymap.set('n', 'grd', builtin.lsp_definitions, { buffer = buf, desc = '[G]oto [D]efinition' })
+      -- vim.keymap.set('n', 'grd', builtin.lsp_definitions, { buffer = buf, desc = '[G]oto [D]efinition' })
 
       -- Fuzzy find all the symbols in your current document.
       -- Symbols are things like variables, functions, types, etc.
@@ -547,7 +578,7 @@ do
       -- Jump to the type of the word under your cursor.
       -- Useful when you're not sure what type a variable is and you want to see
       -- the definition of its *type*, not where it was *defined*.
-      vim.keymap.set('n', 'grt', builtin.lsp_type_definitions, { buffer = buf, desc = '[G]oto [T]ype Definition' })
+      -- vim.keymap.set('n', 'grt', builtin.lsp_type_definitions, { buffer = buf, desc = '[G]oto [T]ype Definition' })
     end,
   })
 
@@ -636,7 +667,7 @@ do
 
       -- Execute a code action, usually your cursor needs to be on top of an error
       -- or a suggestion from your LSP for this to activate.
-      map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
+      -- map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
 
       -- WARN: This is not Goto Definition, this is Goto Declaration.
       --  For example, in C this would take you to the header.
@@ -866,6 +897,10 @@ do
 
     sources = {
       default = { 'lsp', 'path', 'snippets' },
+      -- CodeCompanion：在聊天窗口内启用 / 斜杠命令和 @ 变量补全
+      per_filetype = {
+        codecompanion = { 'codecompanion' },
+      },
     },
 
     snippets = { preset = 'luasnip' },
@@ -963,14 +998,14 @@ do
   -- require 'kickstart.plugins.debug'
   -- require 'kickstart.plugins.indent_line'
   -- require 'kickstart.plugins.lint'
-  -- require 'kickstart.plugins.autopairs'
-  -- require 'kickstart.plugins.neo-tree'
+  require 'kickstart.plugins.autopairs'
+  require 'kickstart.plugins.neo-tree'
   -- require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- require 'custom.plugins'
+  require 'custom.plugins'
 end
 
 -- The line beneath this is called `modeline`. See `:help modeline`

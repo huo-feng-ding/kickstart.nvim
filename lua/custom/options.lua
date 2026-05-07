@@ -95,23 +95,12 @@ vim.api.nvim_create_autocmd('FileType', {
   callback = function() vim.opt_local.formatoptions:remove { 'r', 'o' } end,
 })
 
--- 实现 Ctrl + 鼠标左键 点击打开链接
-vim.keymap.set('n', '<C-LeftMouse>', function()
-  -- 获取鼠标点击的窗口和行列位置
-  local mouse_pos = vim.fn.getmousepos()
+-- vim.pack 更新插件命令
+vim.api.nvim_create_user_command("PackUpdate", function()
+  vim.pack.update()
+end, {desc="vim.pack: 更新所有插件"})
 
-  -- 检查点击是否在有效的普通窗口内（排除侧边栏、浮动窗等）
-  if mouse_pos.winid == 0 or vim.api.nvim_win_get_config(mouse_pos.winid).relative ~= '' then return end
-
-  -- 1. 切换到点击的窗口
-  vim.api.nvim_set_current_win(mouse_pos.winid)
-  -- 2. 将光标移动到点击的行和列
-  vim.api.nvim_win_set_cursor(mouse_pos.winid, { mouse_pos.line, mouse_pos.column - 1 })
-
-  -- 3. 执行打开链接的命令
-  vim.cmd 'normal gx'
-end, { desc = 'Move cursor and open URL under mouse' })
-
+-- 以下是在 Neovide 程序中的定制
 if vim.g.neovide then
   -- 以下代码实现在 Neovide 中根据输入模式自动切换输入法状态（IME）
   vim.g.neovide_input_ime = true
