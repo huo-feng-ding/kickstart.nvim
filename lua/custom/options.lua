@@ -28,7 +28,7 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.smoothscroll = false
 -- 禁用环绕搜索
-vim.opt.wrapscan = true
+vim.opt.wrapscan = false
 -- 启用当前行高亮
 vim.opt.cursorline = true
 -- 显示匹配括号
