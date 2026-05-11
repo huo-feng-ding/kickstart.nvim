@@ -74,7 +74,7 @@ require("codecompanion").setup({
 					-- 覆盖参数
 					schema = {
 						model = {
-							default = "qwen3.5-122b-a10b",
+							default = "qwen3.6-flash-2026-04-16",
 						},
 					},
 				})
@@ -140,6 +140,21 @@ require("codecompanion").setup({
 			adapter = "aliyun",
 		},
 	},
+
+	-- 下边是使用claude在侧边打开，和上边的配置冲突，只能两选一
+	-- interactions = {
+	--    cli = {
+	--      agent = "claude",
+	--      agents = {
+	--        claude = {
+	--          cmd = "claude",
+	--          args = {},
+	--          description = "Claude Code CLI",
+	--          provider = "terminal",
+	--        },
+	--      },
+	--    },
+	--  },
 
 	-- ── 全局选项 ────────────────────────────────────────────────────
 	opts = {
