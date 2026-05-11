@@ -74,7 +74,7 @@ require("codecompanion").setup({
 					-- 覆盖参数
 					schema = {
 						model = {
-							default = "qwen3.5-122b-a10b",
+							default = "qwen3.5-flash",
 						},
 					},
 				})

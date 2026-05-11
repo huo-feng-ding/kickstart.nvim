@@ -36,6 +36,38 @@ vim.keymap.set('v', '<C-V>', '"+gP', { noremap = true })
 vim.keymap.set('i', '<C-V>', '<C-R>+', { noremap = true })
 vim.keymap.set('', '<S-Insert>', '"+gP', { noremap = true })
 
+-- 监听鼠标左键弹起 (Release)
+-- 当在可视模式下松开鼠标时，执行 y (yank) 并退出可视模式
+-- vim.keymap.set('v', '<LeftRelease>', '"*y', { desc = '鼠标选中即复制到系统剪贴板' })
+-- local function yank_and_exit()
+--     -- 检查是否处于可视模式（双击拖拽会自动进入可视模式）
+--     local mode = vim.api.nvim_get_mode().mode
+--     if mode:match("[vV\22]") then
+--         -- 执行复制到系统剪贴板
+--         vim.cmd('normal! "*y')
+--         -- 视觉反馈：瞬间回到普通模式，让用户知道复制完成了
+--         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), 'n', true)
+--         print("已成功复制选中内容")
+--     end
+-- end
+
+-- 鼠标右键点击后复制选中的文字
+-- 使用 popup 模式，这是最稳妥的合法参数
+-- vim.opt.mousemodel = 'popup' 
+--  彻底禁用右键菜单内容 (关键点)
+-- 这会清空 Neovim 默认的右键菜单，防止它在右键点击时弹出
+-- vim.cmd([[
+--   silent! aunmenu PopUp
+--   silent! aunmenu PopUp.-1-
+-- ]])
+-- vim.keymap.set({'v', 'x'}, '<RightRelease>', function()
+--     yank_and_exit()
+-- end, { noremap = true, silent = true })
+
+vim.keymap.set('x', '<RightMouse>', '"+y', { silent = true })
+-- vim.keymap.set('n', '<RightMouse>', ':silent! normal! "+yiw<CR>', { silent = true })
+
+
 -- Ctrl+s 进行保存操作
 -- vim.keymap.set('n', '<C-s>', ':w<CR>', { noremap = true })
 -- vim.keymap.set('v', '<C-s>', '<Esc>:w<CR>', { noremap = true })
@@ -177,6 +209,12 @@ vim.api.nvim_set_keymap('n', '<A-h>', '<C-w>h', { noremap = true })
 vim.api.nvim_set_keymap('n', '<A-j>', '<C-w>j', { noremap = true })
 vim.api.nvim_set_keymap('n', '<A-k>', '<C-w>k', { noremap = true })
 vim.api.nvim_set_keymap('n', '<A-l>', '<C-w>l', { noremap = true })
+
+-- 分屏窗口大小调整 (使用 Alt + uiop)
+vim.keymap.set('n', '<A-i>', '<C-w>+', { desc = 'Increase window height' })
+vim.keymap.set('n', '<A-u>', '<C-w>-', { desc = 'Decrease window height' })
+vim.keymap.set('n', '<A-o>', '<C-w>>', { desc = 'Increase window width' })
+vim.keymap.set('n', '<A-y>', '<C-w><', { desc = 'Decrease window width' })
 
 -- 映射 Ctrl+Backspace 删除前一个单词
 vim.api.nvim_set_keymap('i', '<A-BS>', '<C-w>', { noremap = true })

@@ -53,53 +53,72 @@ map({ 'n', 'i' }, '<A-t>', '<Cmd>tabnew<CR>')
 map({ 'n', 'i' }, '<A-w>', '<Cmd>SmartTabClose<CR>')
 
 -- 解决溢出显示不全的核心：左右滚动视图
-map('n', '<A-h>', '<Cmd>BufferLineCyclePrev<CR>')
-map('n', '<A-l>', '<Cmd>BufferLineCycleNext<CR>')
+-- map('n', '<A-S-h>', '<Cmd>BufferLineCyclePrev<CR>')
+-- map('n', '<A-S-l>', '<Cmd>BufferLineCycleNext<CR>')
+
+-- 向左移动标签页 (Tab)
+map('n', '<A-S-h>', function()
+    local current = vim.fn.tabpagenr()
+    if current > 1 then
+        vim.cmd('tabmove -1')
+    else
+        print("已经是第一个标签页了")
+    end
+end, { desc = 'Move tab left' })
+
+-- 向右移动标签页 (Tab)
+map('n', '<A-S-l>', function()
+    local current = vim.fn.tabpagenr()
+    local total = vim.fn.tabpagenr('$')
+    if current < total then
+        vim.cmd('tabmove +1')
+    else
+        print("已经是最后一个标签页了")
+    end
+end, { desc = 'Move tab right' })
 
 -- 快速切换 (1-9)
 for i = 1, 9 do
   map({ 'n', 'i' }, '<A-' .. i .. '>', function() require('bufferline').go_to(i, true) end)
 end
 
--- 修复后的 Telescope 跳转逻辑 (使用底层 picker)
-map('n', '<A-p>', function()
-  local ok, builtin = pcall(require, 'telescope.builtin')
-  if ok then
-    -- 尝试使用多种可能的内置名称，增加容错性
-    local picker = builtin.tabpages or builtin.tabs
-    if picker then
-      picker()
-    else
-      -- 如果内置选择器都找不到，手动列出所有 tabpage
-      require('telescope.pickers')
-        .new({}, {
-          prompt_title = 'Tabpages',
-          finder = require('telescope.finders').new_table {
-            results = vim.api.nvim_list_tabpages(),
-            entry_maker = function(entry)
-              local bufnr = vim.api.nvim_win_get_buf(vim.api.nvim_tabpage_get_win(entry))
-              local name = vim.api.nvim_buf_get_name(bufnr)
-              return {
-                value = entry,
-                display = string.format('%d: %s', entry, vim.fn.fnamemodify(name, ':t')),
-                ordinal = name,
-              }
-            end,
-          },
-          sorter = require('telescope.config').values.generic_sorter {},
-          attach_mappings = function(prompt_bufnr, _)
-            require('telescope.actions').select_default:replace(function()
-              local selection = require('telescope.actions.state').get_selected_entry()
-              require('telescope.actions').close(prompt_bufnr)
-              vim.api.nvim_set_current_tabpage(selection.value)
-            end)
-            return true
-          end,
-        })
-        :find()
+
+local actions = require('telescope.actions')
+local action_state = require('telescope.actions.state')
+-- 自定义函数：如果 buffer 已在标签页打开则跳转，否则新建标签页
+local smart_tab_drop = function(prompt_bufnr)
+  local selection = action_state.get_selected_entry()
+  local bufnr = selection.bufnr or vim.fn.bufnr(selection.path or selection.filename)
+  
+  -- 检查该 buffer 是否已经在某个窗口/标签页中显示
+  local tab_list = vim.api.nvim_list_tabpages()
+  for _, tab in ipairs(tab_list) do
+    local win_list = vim.api.nvim_tabpage_list_wins(tab)
+    for _, win in ipairs(win_list) do
+      if vim.api.nvim_win_get_buf(win) == bufnr then
+        actions.close(prompt_bufnr) -- 关闭 Telescope 窗口
+        vim.api.nvim_set_current_tabpage(tab)
+        vim.api.nvim_set_current_win(win)
+        return
+      end
     end
   end
-end, { desc = '搜索并切换标签页' })
+  -- 如果没找到，则使用默认的打开标签页动作
+  actions.select_tab(prompt_bufnr)
+end
+require('telescope').setup {
+  defaults = {
+    mappings = {
+      i = {
+        ["<CR>"] = smart_tab_drop,
+      },
+      n = {
+        ["<CR>"] = smart_tab_drop,
+      },
+    },
+  },
+}
+
 
 -- ── 3. Bufferline UI 配置, :h bufferline-configuration 查看更多配置 ───────────────────────────────────────
 -- 真彩色（必须开启！）
