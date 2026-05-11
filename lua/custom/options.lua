@@ -59,7 +59,11 @@ vim.opt.diffopt:append 'vertical'
 -- 开启标题显示
 vim.opt.title = true
 -- 自定义标题格式，加上 [NVIM] 前缀方便 AHK 识别
-vim.opt.titlestring = '[NVIM] %t'
+-- 判断如果是yazi程序打开的，不配置 vim.opt.titlestring = '[NVIM] %t'
+if vim.env.FROM_SHELL then
+  -- 如果 YAZI_CWD 不存在，则认为不是由 Yazi 启动，配置自定义标题
+  vim.opt.titlestring = '[NVIM] %t'
+end
 -- (可选) 退出时确保标题被清理（虽然 Terminal 通常会自动处理）
 vim.api.nvim_create_autocmd('VimLeave', {
   callback = function() vim.opt.titlestring = '' end,

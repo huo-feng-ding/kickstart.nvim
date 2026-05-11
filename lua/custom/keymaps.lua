@@ -11,7 +11,7 @@ vim.keymap.set('n', '`', "'", { noremap = true })
 vim.api.nvim_set_keymap('n', '<BS>', [[v:hlsearch ? "<Cmd>nohlsearch\<CR>" : "\<CR>"]], { expr = true, noremap = true })
 
 -- SecureCRT 连接的时候发送的 backspace 是 ctrl-h
-vim.keymap.set('n', '<C-H>', [[v:hlsearch ? ":nohlsearch\<CR>" : "\<CR>"]], { expr = true, noremap = true })
+vim.keymap.set('n', '<C-h>', [[v:hlsearch ? ":nohlsearch\<CR>" : "\<CR>"]], { expr = true, noremap = true })
 
 -- 全选操作 普通模式和插入模式下均生效
 -- 定义函数：全选复制并保持光标位置
@@ -26,15 +26,54 @@ end
 vim.keymap.set({ 'n', 'i' }, '<C-a>', async_select_all_and_copy, { desc = '全选并复制到剪贴板（保持光标）' })
 
 -- 复制粘贴操作
-vim.keymap.set('v', '<C-X>', '"+x', { noremap = true })
+vim.keymap.set('v', '<C-x>', '"+x', { noremap = true })
 vim.keymap.set('v', '<S-Del>', '"+x', { noremap = true })
-vim.keymap.set('v', '<C-C>', '"+y', { noremap = true })
-vim.keymap.set('v', '<C-Insert>', '"+y', { noremap = true })
-vim.keymap.set('n', '<C-Insert>', '<Nop>', { noremap = true })
-vim.keymap.set('n', '<C-V>', '"+gP', { noremap = true })
-vim.keymap.set('v', '<C-V>', '"+gP', { noremap = true })
-vim.keymap.set('i', '<C-V>', '<C-R>+', { noremap = true })
+vim.keymap.set('v', '<C-c>', '"+y', { noremap = true })
+-- vim.keymap.set('v', '<C-Insert>', '"+y', { noremap = true })
+-- vim.keymap.set('n', '<C-Insert>', '<Nop>', { noremap = true })
+-- 在 windows terminal 中配置了 ctrl+v 粘贴系统剪贴板的内容，这里的配置在这windows terminal平台下在行视图模式下粘贴有问题，可以使用 <leader>p 来粘贴
+vim.keymap.set('n', '<C-v>', '"+gP', { noremap = true })
+vim.keymap.set('v', '<C-v>', '"+gP', { noremap = true })
+vim.keymap.set('i', '<C-v>', '<C-r>+', { noremap = true })
+vim.keymap.set('c', '<C-v>', '<C-R>+', { noremap = true })
 vim.keymap.set('', '<S-Insert>', '"+gP', { noremap = true })
+
+-- Alt+Shift+V 粘贴系统剪贴板 (参照 <C-v> 的映射), 借助autohotkey等工具将 Ctrl+V 转换成 Alt+Shift+V 发送给 Neovim，这样在 Windows Terminal 中也能正常使用 Ctrl+v 来粘贴系统剪贴板的内容。
+vim.keymap.set('n', '<A-S-v>', '"+gP', { noremap = true })
+vim.keymap.set('v', '<A-S-v>', '"+gP', { noremap = true })
+vim.keymap.set('i', '<A-S-v>', '<C-r>+', { noremap = true })
+vim.keymap.set('c', '<A-S-v>', '<C-R>+', { noremap = true })
+
+-- 监听鼠标左键弹起 (Release)
+-- 当在可视模式下松开鼠标时，执行 y (yank) 并退出可视模式
+-- vim.keymap.set('v', '<LeftRelease>', '"*y', { desc = '鼠标选中即复制到系统剪贴板' })
+-- local function yank_and_exit()
+--     -- 检查是否处于可视模式（双击拖拽会自动进入可视模式）
+--     local mode = vim.api.nvim_get_mode().mode
+--     if mode:match("[vV\22]") then
+--         -- 执行复制到系统剪贴板
+--         vim.cmd('normal! "*y')
+--         -- 视觉反馈：瞬间回到普通模式，让用户知道复制完成了
+--         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), 'n', true)
+--         print("已成功复制选中内容")
+--     end
+-- end
+
+-- 鼠标右键点击后复制选中的文字
+-- 使用 popup 模式，这是最稳妥的合法参数
+-- vim.opt.mousemodel = 'popup'
+--  彻底禁用右键菜单内容 (关键点)
+-- 这会清空 Neovim 默认的右键菜单，防止它在右键点击时弹出
+-- vim.cmd([[
+--   silent! aunmenu PopUp
+--   silent! aunmenu PopUp.-1-
+-- ]])
+-- vim.keymap.set({'v', 'x'}, '<RightRelease>', function()
+--     yank_and_exit()
+-- end, { noremap = true, silent = true })
+
+vim.keymap.set('x', '<RightMouse>', '"+y', { silent = true })
+-- vim.keymap.set('n', '<RightMouse>', ':silent! normal! "+yiw<CR>', { silent = true })
 
 -- Ctrl+s 进行保存操作
 -- vim.keymap.set('n', '<C-s>', ':w<CR>', { noremap = true })
@@ -75,19 +114,23 @@ vim.keymap.set('n', '<leader>P', '"+P', { noremap = true })
 -- 复制文件名、路径等到系统剪贴板
 -- <leader>fn: 复制当前文件名（不含路径）到剪贴板
 --   示例：/path/to/file.txt -> file.txt
-vim.keymap.set('n', '<leader>fn', ':let @+ = expand("%:t") | echo "cb> " . @+<CR>', { noremap = true })
+vim.keymap.set('n', '<leader>cf', ':let @+ = expand("%:t") | echo "cb> " . @+<CR>', { noremap = true })
+
+-- Map <leader>cf to copy the filename (without extension) to the system clipboard.
+--   示例：/path/to/file.txt -> file
+vim.keymap.set('n', '<leader>cn', ':let @+ = expand("%:t:r") | echo "cb> " . @+<CR>', { noremap = true })
 
 -- <leader>fp: 复制当前文件的完整绝对路径到剪贴板
 --   示例：/path/to/file.txt -> /path/to/file.txt
-vim.keymap.set('n', '<Leader>fp', ':let @+ = expand("%:p") | echo "cb> " . @+<CR>', { noremap = true })
+vim.keymap.set('n', '<Leader>cc', ':let @+ = expand("%:p") | echo "cb> " . @+<CR>', { noremap = true })
 
 -- <leader>dp: 复制当前文件所在目录的完整路径到剪贴板
 --   示例：/path/to/file.txt -> /path/to
-vim.keymap.set('n', '<Leader>dp', ':let @+ = expand("%:p:h") | echo "cb> " . @+<CR>', { noremap = true })
+vim.keymap.set('n', '<Leader>cd', ':let @+ = expand("%:p:h") | echo "cb> " . @+<CR>', { noremap = true })
 
 -- <leader>dd: 复制当前文件所在目录的名称到剪贴板（dir name Yield）
 --   示例：/path/to/file.txt -> to
-vim.keymap.set('n', '<Leader>dd', ':let @+ = expand("%:p:h:t") | echo "cb> " . @+<CR>', { noremap = true })
+vim.keymap.set('n', '<Leader>cp', ':let @+ = expand("%:p:h:t") | echo "cb> " . @+<CR>', { noremap = true })
 
 -- 修改粘贴行为
 vim.keymap.set('x', 'p', 'p:let @"=@0<CR>', { silent = true })
@@ -150,7 +193,6 @@ vim.keymap.set('n', '<Leader>n<space>', '/<C-R>+<CR>', { noremap = true })
 vim.keymap.set('n', '<Leader>NN', '?<C-R>"<CR>', { noremap = true })
 vim.keymap.set('n', '<Leader>N<space>', '?<C-R>+<CR>', { noremap = true })
 
-vim.keymap.set('c', '<C-v>', '<C-R>+', { noremap = true })
 
 -- 向下滚动 1/3 屏幕 (对应 Ctrl-e)
 vim.keymap.set('n', '<Leader>d', function()
@@ -178,8 +220,38 @@ vim.api.nvim_set_keymap('n', '<A-j>', '<C-w>j', { noremap = true })
 vim.api.nvim_set_keymap('n', '<A-k>', '<C-w>k', { noremap = true })
 vim.api.nvim_set_keymap('n', '<A-l>', '<C-w>l', { noremap = true })
 
+-- 分屏窗口大小调整 (使用 Alt + uiop)
+-- vim.keymap.set('n', '<A-i>', '<C-w>+', { desc = 'Increase window height' })
+-- vim.keymap.set('n', '<A-u>', '<C-w>-', { desc = 'Decrease window height' })
+-- vim.keymap.set('n', '<A-o>', '<C-w>>', { desc = 'Increase window width' })
+-- vim.keymap.set('n', '<A-y>', '<C-w><', { desc = 'Decrease window width' })
+vim.keymap.set('n', '<leader>r', function()
+  vim.notify('Resize mode: use h/j/k/l, Esc to quit', vim.log.levels.INFO)
+  while true do
+    local ok, key = pcall(vim.fn.getchar)
+    if not ok then break end
+
+    local c = vim.fn.nr2char(key)
+    if c == 'h' then
+      vim.cmd 'vertical resize -2'
+    elseif c == 'l' then
+      vim.cmd 'vertical resize +2'
+    elseif c == 'j' then
+      vim.cmd 'resize -2'
+    elseif c == 'k' then
+      vim.cmd 'resize +2'
+    elseif c == '\27' or c == 'q' then -- Esc
+      break
+    end
+
+    -- 重绘屏幕
+    vim.cmd 'redraw!'
+  end
+end, { desc = 'Enter window resize mode' })
+
 -- 映射 Ctrl+Backspace 删除前一个单词
-vim.api.nvim_set_keymap('i', '<A-BS>', '<C-w>', { noremap = true })
+vim.api.nvim_set_keymap('i', '<C-BS>', '<C-w>', { noremap = true })
+vim.api.nvim_set_keymap('c', '<C-BS>', '<C-w>', { noremap = true })
 
 -- vim-ReplaceWithRegister插件的gr命令和lsp插件有冲突; 2025-07-11在init.lua的lsp配置中已经将下边这两个快捷键注释掉了，所以下边的也不用去删除了。这里先保持注释以便日后知道有这么个问题。 In Neovim, there's an overlap with LSP-related commands, and if you want to use the plugin's gr{motion} with inner/outer text objects, you need to remove (and optionally remap) the gra and gri commands:
 if vim.fn.maparg('gra', 'n') ~= '' then vim.keymap.del('n', 'gra') end
@@ -264,7 +336,7 @@ local function setup_clipboard()
     }
   end
 end
-setup_clipboard()
+-- setup_clipboard()
 
 -- 实现 Ctrl + 鼠标左键 点击打开链接
 vim.keymap.set('n', '<C-LeftMouse>', function()

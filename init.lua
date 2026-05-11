@@ -245,7 +245,7 @@ do
     group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
     callback = function() vim.hl.on_yank() end,
   })
-  
+
   require 'custom'
 end
 
@@ -392,34 +392,34 @@ do
       comments = { italic = false }, -- Disable italics in comments
     },
     on_highlights = function(highlights, colors)
-        highlights.Visual = {
-            bg = '#0e5e97',
-        }
-        highlights.CursorLine = {
-            bg = '#064470',
-        }
-        highlights.IncSearch = {
-            bg = '#b6a014',
-            fg = '#fafafa',
-        }
-        -- 新增：修改 TabBar 颜色
-        -- TabLine: 未激活的标签页（让文字亮一点，背景深一点）
-        highlights.TabLine = {
-            -- fg = colors.fg_gutter, -- 使用主题内置的灰色，或者直接填 '#bbbbbb'
-            fg = '#bbbbbb',
-            bg = colors.bg_statusline, -- 使用深色背景
-        }
-        -- TabLineSel: 当前激活的标签页（让它非常显眼）
-        -- highlights.TabLineSel = {
-        --   fg = colors.orange, -- 使用主题的橙色（或者用 colors.blue/colors.magenta）
-        --   bg = colors.bg_highlight,
-        --   bold = true,
-        -- }
-        -- TabLineFill: 标签栏剩余部分的背景
-        -- highlights.TabLineFill = {
-        --   bg = colors.bg_dark,
-        -- }
-    end,      
+      highlights.Visual = {
+        bg = '#0e5e97',
+      }
+      highlights.CursorLine = {
+        bg = '#064470',
+      }
+      highlights.IncSearch = {
+        bg = '#b6a014',
+        fg = '#fafafa',
+      }
+      -- 新增：修改 TabBar 颜色
+      -- TabLine: 未激活的标签页（让文字亮一点，背景深一点）
+      highlights.TabLine = {
+        -- fg = colors.fg_gutter, -- 使用主题内置的灰色，或者直接填 '#bbbbbb'
+        fg = '#bbbbbb',
+        bg = colors.bg_statusline, -- 使用深色背景
+      }
+      -- TabLineSel: 当前激活的标签页（让它非常显眼）
+      -- highlights.TabLineSel = {
+      --   fg = colors.orange, -- 使用主题的橙色（或者用 colors.blue/colors.magenta）
+      --   bg = colors.bg_highlight,
+      --   bold = true,
+      -- }
+      -- TabLineFill: 标签栏剩余部分的背景
+      -- highlights.TabLineFill = {
+      --   bg = colors.bg_dark,
+      -- }
+    end,
   }
 
   -- Load the colorscheme here.
@@ -468,7 +468,7 @@ do
   -- default behavior. For example, here we set the section for
   -- cursor location to LINE:COLUMN
   ---@diagnostic disable-next-line: duplicate-set-field
-  statusline.section_location = function() return '%2l:%-2v' end
+  statusline.section_location = function() return '%2l:%-2v [%L]' end
 
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
@@ -853,8 +853,36 @@ do
   -- require('luasnip.loaders.from_vscode').lazy_load()
 
   -- [[ Autocomplete Engine ]]
+  vim.pack.add { { src = gh 'fang2hou/blink-copilot.git' } }
   vim.pack.add { { src = gh 'saghen/blink.cmp', version = vim.version.range '1.*' } }
   require('blink.cmp').setup {
+    cmdline = {
+      keymap = {
+        preset = 'inherit',
+        -- 相关配置文档 https://cmp.saghen.dev/modes/cmdline.html
+        ['<Tab>'] = { 'select_and_accept', 'fallback' },
+        ['<CR>'] = { 'fallback' },
+        ['<Esc>'] = {
+          'cancel',
+          function()
+            -- 菜单没开，或者菜单关了之后，直接退出命令行（发送 Ctrl-C 信号）
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-c>', true, true, true), 'n', true)
+          end,
+        },
+      },
+      completion = {
+        ghost_text = {
+          enabled = function()
+            -- 获取当前命令行类型
+            local cmd_type = vim.fn.getcmdtype()
+            -- 如果是 / 或 ? 检索模式，则返回 false（不显示 ghost_text）
+            if cmd_type == '/' or cmd_type == '?' then return false end
+            -- 其他模式（如冒号命令 :）默认开启
+            return true
+          end,
+        },
+      },
+    },
     keymap = {
       -- 'default' (recommended) for mappings similar to built-in completions
       --   <c-y> to accept ([y]es) the completion.
@@ -881,12 +909,19 @@ do
 
       -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
       --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+      ['<Tab>'] = { 'accept', 'fallback' },
+      ['<CR>'] = { 'accept', 'fallback' },
+      ['<A-/>'] = { 'show', 'show_documentation', 'hide_documentation' },
     },
 
     appearance = {
       -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
       -- Adjusts spacing to ensure icons are aligned
       nerd_font_variant = 'mono',
+      -- 🌟 新增：为补全菜单中的 Copilot 选项添加一个好看的机器人图标
+      kind_icons = {
+        Copilot = ' ',
+      },
     },
 
     completion = {
@@ -896,10 +931,20 @@ do
     },
 
     sources = {
-      default = { 'lsp', 'path', 'snippets' },
+      default = { 'lsp', 'path', 'snippets', 'copilot' },
       -- CodeCompanion：在聊天窗口内启用 / 斜杠命令和 @ 变量补全
       per_filetype = {
-        codecompanion = { 'codecompanion' },
+        -- 优化 CodeCompanion：不仅启用 'codecompanion'，还继承默认的 lsp/path/copilot 提示
+        codecompanion = { 'codecompanion', inherit_defaults = true },
+      },
+      -- 声明 copilot 补全源的具体提供者（Provider）
+      providers = {
+        copilot = {
+          name = 'copilot',
+          module = 'blink-copilot',
+          score_offset = 100, -- 让 Copilot 的补全建议在列表中稍微靠前
+          async = true,
+        },
       },
     },
 
