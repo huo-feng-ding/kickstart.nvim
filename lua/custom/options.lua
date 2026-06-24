@@ -99,6 +99,30 @@ vim.api.nvim_create_autocmd('FileType', {
   callback = function() vim.opt_local.formatoptions:remove { 'r', 'o' } end,
 })
 
+-- 文件有修改自动加载
+vim.opt.autoread = true
+
+local group = vim.api.nvim_create_augroup("auto_read", { clear = true })
+
+vim.api.nvim_create_autocmd(
+    { "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" },
+    {
+        group = group,
+        callback = function()
+            if vim.fn.mode() ~= "c" then
+                vim.cmd("checktime")
+            end
+        end,
+    }
+)
+
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+    group = group,
+    callback = function()
+        print("File reloaded from disk")
+    end,
+})
+
 -- vim.pack 更新插件命令
 vim.api.nvim_create_user_command("PackUpdate", function()
   vim.pack.update()

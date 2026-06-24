@@ -168,9 +168,10 @@ vim.keymap.set('v', '<', '<gv', { noremap = true })
 -- 回车直接加上一行
 vim.keymap.set('n', '<CR>', 'o<Esc>', { noremap = true })
 vim.keymap.set('n', '<C-CR>', 'O<Esc>', { noremap = true })
-vim.keymap.set('i', '<C-CR>', '<C-O>O', { noremap = true })
 vim.keymap.set('n', '<NL>', 'O<Esc>', { noremap = true })
+vim.keymap.set('i', '<C-CR>', '<C-O>O', { noremap = true })
 vim.keymap.set('i', '<NL>', '<C-O>O', { noremap = true })
+vim.keymap.set('i', '<S-CR>', '<C-O>o', { noremap = true, desc = '在当前行下方新建一行并保持插入模式' })
 
 -- 新建标签快捷键
 vim.keymap.set('', '<C-t>', ':tabnew<CR>', { noremap = true })
